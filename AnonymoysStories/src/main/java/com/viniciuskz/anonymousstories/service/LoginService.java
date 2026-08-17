@@ -1,34 +1,31 @@
 package com.viniciuskz.anonymousstories.service;
 
+import com.viniciuskz.anonymousstories.dto.LoginRequestDTO;
+import com.viniciuskz.anonymousstories.dto.LoginResponseDTO;
 import com.viniciuskz.anonymousstories.entity.User;
-import com.viniciuskz.anonymousstories.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
 @Service
-public class LoginService{
+public class LoginService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final TokenService tokenService;
 
-    public LoginService (UserRepository userRepository, PasswordEncoder passwordEncoder) {
-
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    public LoginService(AuthenticationManager authenticationManager, TokenService tokenService) {
+        this.authenticationManager = authenticationManager;
+        this.tokenService = tokenService;
     }
+    public LoginResponseDTO login(LoginRequestDTO request){
+        var authToken = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+        Authentication authentication = authenticationManager.authenticate(authToken);
 
-    public User login(User user){
+        User user = (User) authentication.getPrincipal();
+        String token = tokenService.generateToken(user);
 
-        Optional<User> loginUser = userRepository.findByEmail(user.getEmail());
-
-        if(loginUser.isEmpty()){
-            throw new IllegalArgumentException("Email doesn't exist.");
-        }
-        if (!passwordEncoder.matches(user.getPassword(), loginUser.get().getPassword())){
-            throw new IllegalArgumentException("Password incorrect.");
-        }
-        return loginUser.get();
+        return new LoginResponseDTO(user.getId(), user.getName(), user.getEmail(), token);
     }
 }

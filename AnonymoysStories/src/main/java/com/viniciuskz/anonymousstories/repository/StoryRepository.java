@@ -11,6 +11,7 @@ import java.util.List;
 @Repository
 public interface StoryRepository extends JpaRepository<Story, Long> {
     List<Story> findByUserId (Long userId);
+    List<Story> findAllByOrderByCreatedAtDesc();
 
 
     //@Query() <- Banco de dados ! implementação depois !

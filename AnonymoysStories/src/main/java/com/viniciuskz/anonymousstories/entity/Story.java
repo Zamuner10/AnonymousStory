@@ -67,6 +67,8 @@ public class Story {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+    @PrePersist
+    public void prePersist(){this.createdAt = LocalDateTime.now();}
 
     public void setUser(User user){
         this.user = user;

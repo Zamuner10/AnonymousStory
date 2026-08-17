@@ -38,12 +38,20 @@ public class User implements UserDetails
     @Column(nullable = false)
     private Integer age;
 
-    public User(Long id, String name, String email, String password, Integer age){
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "is_verified")
+    private Boolean isVerified = false;
+
+    public User(Long id, String name, String email, String password, Integer age, String verificationToken, Boolean isVerified) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.age = age;
+        this.verificationToken = verificationToken;
+        this.isVerified = isVerified;
     }
 
     public User (){}
@@ -73,12 +81,26 @@ public class User implements UserDetails
         this.password = password;
     }
 
+    public void setVerificationToken(String verificationToken) {
+        this.verificationToken = verificationToken;
+    }
+    public String getVerificationToken() {
+        return verificationToken;
+    }
+
+    public void setIsVerified(boolean isVerified) {
+        this.isVerified = isVerified;
+    }
+    public Boolean getIsVerified() {
+        return isVerified;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
     }
 
-    public String getPassword(){
+    public String getPassword() {
         return password;
     }
 
@@ -104,15 +126,14 @@ public class User implements UserDetails
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        return this.isVerified;
     }
 
-    public void setAge(Integer age){
+    public void setAge(Integer age) {
         this.age = age;
     }
-    public Integer getAge(){
+    public Integer getAge() {
         return age;
     }
-
     
 }
