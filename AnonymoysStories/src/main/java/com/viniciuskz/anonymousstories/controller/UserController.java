@@ -2,6 +2,7 @@ package com.viniciuskz.anonymousstories.controller;
 
 
 import com.viniciuskz.anonymousstories.dto.UserRequestDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import jakarta.validation.Valid;
 @RequestMapping ("/users")
 public class
 UserController {
+
 
     private final UserService userService;
 

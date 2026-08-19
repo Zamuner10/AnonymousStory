@@ -38,4 +38,17 @@ public class GlobalExceptionHandler {
         RestErrorMessage error = new RestErrorMessage(HttpStatus.BAD_REQUEST, ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<RestErrorMessage>handleResourceNotFoundException(ResourceNotFoundException ex){
+        RestErrorMessage error = new RestErrorMessage(HttpStatus.NOT_FOUND, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+
+    @ExceptionHandler(ContentModerationException.class)
+    public ResponseEntity<RestErrorMessage>handleContentModerationException(ContentModerationException ex){
+        RestErrorMessage error = new RestErrorMessage(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
+    }
 }

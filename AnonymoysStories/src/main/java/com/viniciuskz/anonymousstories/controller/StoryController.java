@@ -30,30 +30,27 @@ public class StoryController {
             @Valid @RequestBody StoryRequestDTO dto,
             @AuthenticationPrincipal User user){
 
-        StoryResponseDTO createdStory = storyService.createStory(dto, user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdStory);
+        StoryResponseDTO response = storyService.createStory(dto, user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     //Feed principal
     @GetMapping
     public ResponseEntity<List<StoryResponseDTO>> getAllStories(){
-        List<StoryResponseDTO> stories = storyService.getAllStories();
-        return ResponseEntity.ok(stories);
+        return ResponseEntity.ok(storyService.getAllStories());
     }
 
     //Buscar pelo ID
     @GetMapping("/{id}")
     public ResponseEntity<StoryResponseDTO> getStoryById(@PathVariable Long id){
-        StoryResponseDTO story = storyService.findById(id);
-        return ResponseEntity.ok(story);
+        return ResponseEntity.ok(storyService.findById(id));
     }
 
 
     //Listar apenas histórias do usuário autenticado
     @GetMapping("/my-stories")
     public ResponseEntity<List<StoryResponseDTO>> getMyStories(@AuthenticationPrincipal User user){
-        List<StoryResponseDTO> stories = storyService.getStoriesByUserId(user.getId());
-        return ResponseEntity.ok(stories);
+        return ResponseEntity.ok(storyService.getStoriesByUserId(user.getId()));
     }
 
     //Deletar história por id

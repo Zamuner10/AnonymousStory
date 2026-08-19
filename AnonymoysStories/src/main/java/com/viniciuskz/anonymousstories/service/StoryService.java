@@ -6,6 +6,7 @@ import com.viniciuskz.anonymousstories.entity.Story;
 import com.viniciuskz.anonymousstories.entity.User;
 import com.viniciuskz.anonymousstories.repository.StoryRepository;
 import com.viniciuskz.anonymousstories.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,13 +17,20 @@ public class StoryService {
 
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;
+    private ContentModerationService contentModerationService;
 
-    public StoryService(StoryRepository storyRepository, UserRepository userRepository) {
+
+
+    public StoryService(StoryRepository storyRepository, UserRepository userRepository, ContentModerationService contentModerationService) {
         this.storyRepository = storyRepository;
         this.userRepository = userRepository;
+        this.contentModerationService = contentModerationService;
     }
+
     // Criar história (Usando DTO e associando o Usuário)
     public StoryResponseDTO createStory(StoryRequestDTO dto, User user) {
+
+        contentModerationService.validateText(dto.title() + " " + dto.content()); //valida titulo e conteúdo juntos na API de IA
 
         Story story = new Story();
         story.setTitle(dto.title());
