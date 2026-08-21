@@ -2,6 +2,7 @@ package com.viniciuskz.anonymousstories.exception;
 
 
 import com.viniciuskz.anonymousstories.dto.RestErrorMessage;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -9,6 +10,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -50,5 +52,31 @@ public class GlobalExceptionHandler {
     public ResponseEntity<RestErrorMessage>handleContentModerationException(ContentModerationException ex){
         RestErrorMessage error = new RestErrorMessage(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<StandardError>handleAccessDenied(AccessDeniedException e, HttpServletRequest request){
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        StandardError err = new StandardError (
+                System.currentTimeMillis(),
+                status.value(),
+                "Acess Invalid",
+                e.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(ModerationServiceException.class)
+    public ResponseEntity<StandardError> handleModerationServiceException (ModerationServiceException e, HttpServletRequest request){
+        HttpStatus status = HttpStatus.SERVICE_UNAVAILABLE;
+        StandardError err = new StandardError (
+                System.currentTimeMillis(),
+                status.value(),
+                "Moderation Service Unavailable",
+                e.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).body(err);
     }
 }

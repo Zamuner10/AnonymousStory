@@ -10,8 +10,13 @@ public record StoryResponseDTO(
         String content,
         LocalDateTime createdAt
 ) {
-    public StoryResponseDTO (Story story){
-        this(story.getId(), story.getTitle(), story.getContent(), story.getCreatedAt());
-
+    // Construtor auxiliar que recebe uma única entidade Story
+    public StoryResponseDTO(Story story) {
+        this(
+                story.getId(),
+                story.getTitle(),
+                story.getContent(),
+                story.getCreatedAt()
+        );
     }
 }

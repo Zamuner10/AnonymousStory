@@ -5,6 +5,7 @@ import com.viniciuskz.anonymousstories.dto.LoginResponseDTO;
 import com.viniciuskz.anonymousstories.service.LoginService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,9 @@ public class LoginController {
 
     private final LoginService loginService;
 
+    @Value("${app.cookie.secure:false}")
+    private boolean isSecureCookie;
+
     public LoginController(LoginService loginService) {
         this.loginService = loginService;
     }
@@ -26,7 +30,7 @@ public class LoginController {
 
         ResponseCookie cookie = ResponseCookie.from("accessToken", loginResponse.getToken())
                 .httpOnly(true)
-                .secure(false)
+                .secure(isSecureCookie)
                 .path("/")
                 .maxAge(7*24*60*60)
                 .sameSite("Lax")

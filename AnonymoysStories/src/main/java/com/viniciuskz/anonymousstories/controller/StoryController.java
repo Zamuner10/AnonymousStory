@@ -37,7 +37,8 @@ public class StoryController {
     //Feed principal
     @GetMapping
     public ResponseEntity<List<StoryResponseDTO>> getAllStories(){
-        return ResponseEntity.ok(storyService.getAllStories());
+        List<StoryResponseDTO> stories = storyService.getAllStories();
+        return ResponseEntity.ok(stories);
     }
 
     //Buscar pelo ID
@@ -49,14 +50,30 @@ public class StoryController {
 
     //Listar apenas histórias do usuário autenticado
     @GetMapping("/my-stories")
-    public ResponseEntity<List<StoryResponseDTO>> getMyStories(@AuthenticationPrincipal User user){
-        return ResponseEntity.ok(storyService.getStoriesByUserId(user.getId()));
+    public ResponseEntity<List<StoryResponseDTO>> getMyStories(@AuthenticationPrincipal User currentUser){
+        List<StoryResponseDTO> stories = storyService.getStoriesByUserId(currentUser.getId());
+        return ResponseEntity.ok(stories);
     }
+
+    //Atualizar história por ID (PUT)
+    @PutMapping("/{id}")
+    public ResponseEntity<StoryResponseDTO> updateStory(
+            @PathVariable Long id,
+            @Valid @RequestBody StoryRequestDTO dto,
+            @AuthenticationPrincipal User currentUser
+    ) {
+        StoryResponseDTO response = storyService.updateStory(id, dto, currentUser);
+        return ResponseEntity.ok(response);
+    }
+
 
     //Deletar história por id
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteStory (@PathVariable Long id){
-        storyService.deleteStory(id);
+    public ResponseEntity<Void> deleteStory (
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
+
+        storyService.deleteStory(id, currentUser);
         return ResponseEntity.noContent().build();
     }
 

@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -26,8 +27,11 @@ import java.io.IOException;
         }
 
         @Override
-        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-                throws ServletException, IOException {
+        protected void doFilterInternal(
+                @NonNull HttpServletRequest request,
+                @NonNull HttpServletResponse response,
+                @NonNull FilterChain filterChain
+        ) throws ServletException, IOException {
 
             var token = recoverToken(request);
 
@@ -48,16 +52,12 @@ import java.io.IOException;
         }
 
         private String recoverToken(HttpServletRequest request){
-            var authHeader = request.getHeader("Authorization");
-            if(authHeader != null && authHeader.startsWith("Bearer")){
-                return authHeader.replace("Bearer", "").trim();
-            }
-
-            if (request.getCookies() != null){
-                for (Cookie cookie: request.getCookies()){
-                    if("acessToken".equals(cookie.getName())){
+            if(request.getCookies() == null){
+                return null;
+                    }
+            for(Cookie cookie: request.getCookies()){
+                if ("accessToken".equals(cookie.getName())){
                     return cookie.getValue();
-                        }
                     }
                 }
 
