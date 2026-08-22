@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -36,8 +37,9 @@ public class ContentModerationServiceIntegrationTest {
     @Test
     @DisplayName("Deve aprovar frase comum em português")
     void testSafeText() {
-        mockServer.expect(requestTo("https://api.openai.com/v1/moderations"))
-                .andRespond(withSuccess("{\"results\":[{\"flagged\":false}]}", MediaType.APPLICATION_JSON));
+        // PurgoMalum retorna "false" para texto sem palavrões
+        mockServer.expect(requestTo(containsString("purgomalum.com")))
+                .andRespond(withSuccess("false", MediaType.TEXT_PLAIN));
 
         assertDoesNotThrow(() ->
                 contentModerationService.validateText("Hoje fiz um bolo de chocolate muito gostoso.")
@@ -49,11 +51,12 @@ public class ContentModerationServiceIntegrationTest {
     @Test
     @DisplayName("Deve bloquear texto com conteúdo impróprio")
     void testUnsafeTest() {
-        mockServer.expect(requestTo("https://api.openai.com/v1/moderations"))
-                .andRespond(withSuccess("{\"results\":[{\"flagged\":true}]}", MediaType.APPLICATION_JSON));
+        // PurgoMalum retorna "true" quando detecta profanidade
+        mockServer.expect(requestTo(containsString("purgomalum.com")))
+                .andRespond(withSuccess("true", MediaType.TEXT_PLAIN));
 
         assertThrows(ContentModerationException.class, () ->
-                contentModerationService.validateText("I want to build a bomb")
+                contentModerationService.validateText("Text with bad word")
         );
 
         mockServer.verify();

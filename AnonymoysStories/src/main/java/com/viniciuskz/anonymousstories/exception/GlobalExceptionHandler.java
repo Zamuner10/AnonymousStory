@@ -1,16 +1,14 @@
 package com.viniciuskz.anonymousstories.exception;
 
-
 import com.viniciuskz.anonymousstories.dto.RestErrorMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -28,39 +26,31 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<RestErrorMessage> handleGeneralException(Exception e) {
-        e.printStackTrace(); //linha temporariamente!
-        RestErrorMessage threatResponse = new RestErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred.");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(threatResponse);
-    }
-
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity <RestErrorMessage> handleIllegalArgumentException (IllegalArgumentException ex ){
+    public ResponseEntity<RestErrorMessage> handleIllegalArgumentException (IllegalArgumentException ex ){
         RestErrorMessage error = new RestErrorMessage(HttpStatus.BAD_REQUEST, ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<RestErrorMessage>handleResourceNotFoundException(ResourceNotFoundException ex){
+    public ResponseEntity<RestErrorMessage> handleResourceNotFoundException(ResourceNotFoundException ex){
         RestErrorMessage error = new RestErrorMessage(HttpStatus.NOT_FOUND, ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
-
     @ExceptionHandler(ContentModerationException.class)
-    public ResponseEntity<RestErrorMessage>handleContentModerationException(ContentModerationException ex){
+    public ResponseEntity<RestErrorMessage> handleContentModerationException(ContentModerationException ex){
         RestErrorMessage error = new RestErrorMessage(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(error);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<StandardError>handleAccessDenied(AccessDeniedException e, HttpServletRequest request){
+    public ResponseEntity<StandardError> handleAccessDenied(AccessDeniedException e, HttpServletRequest request){
         HttpStatus status = HttpStatus.FORBIDDEN;
         StandardError err = new StandardError (
                 System.currentTimeMillis(),
                 status.value(),
-                "Acess Invalid",
+                "Access Invalid",
                 e.getMessage(),
                 request.getRequestURI()
         );
@@ -78,5 +68,18 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(UserNotVerifiedException.class)
+    public ResponseEntity<RestErrorMessage> handleUserNotVerified(UserNotVerifiedException ex){
+        RestErrorMessage error = new RestErrorMessage(HttpStatus.FORBIDDEN, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<RestErrorMessage> handleGeneralException(Exception e) {
+        e.printStackTrace();
+        RestErrorMessage threatResponse = new RestErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred.");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(threatResponse);
     }
 }

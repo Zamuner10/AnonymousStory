@@ -7,7 +7,6 @@ import com.viniciuskz.anonymousstories.entity.Story;
 import com.viniciuskz.anonymousstories.entity.User;
 import com.viniciuskz.anonymousstories.exception.ContentModerationException;
 import com.viniciuskz.anonymousstories.repository.StoryRepository;
-import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

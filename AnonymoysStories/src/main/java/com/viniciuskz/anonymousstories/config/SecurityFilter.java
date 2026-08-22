@@ -33,7 +33,7 @@ import java.io.IOException;
                 @NonNull FilterChain filterChain
         ) throws ServletException, IOException {
 
-            var token = recoverToken(request);
+            var token = this.recoverToken(request);
 
             if(token !=null){
                 var email = tokenService.validateToken(token);

@@ -1,16 +1,8 @@
 package com.viniciuskz.anonymousstories.service;
 
-import com.viniciuskz.anonymousstories.dto.ModerationRequest;
-import com.viniciuskz.anonymousstories.dto.ModerationResponse;
 import com.viniciuskz.anonymousstories.exception.ContentModerationException;
 import com.viniciuskz.anonymousstories.exception.ModerationServiceException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import java.util.regex.Pattern;
@@ -20,13 +12,9 @@ public class ContentModerationService {
 
     private RestClient restClient;
 
-    @Value("${openai.api.url:https://api.openai.com/v1/moderations}")
-    private String openAiUrl;
+    private static final String PURGOMALUM_URL = "https://www.purgomalum.com/service/containsprofanity";
 
-    @Value("${openai.api.key}")
-    private String apiKey;
-
-    // Regras de detecção local para PII (Dados Pessoais) e Spam basico
+    // Regras de detecção local para PII (Dados Pessoais) e Spam básico
     private static final Pattern CPF_PATTERN = Pattern.compile("\\b\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}\\b");
     private static final Pattern EMAIL_PATTERN = Pattern.compile("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
     private static final Pattern PHONE_PATTERN = Pattern.compile("(\\b\\(?\\d{2}\\)?\\s?)(\\d{4,5}-?\\d{4}\\b)");
@@ -36,7 +24,6 @@ public class ContentModerationService {
         this.restClient = RestClient.create();
     }
 
-    // Permite injetar o RestClient configurado nos testes
     public void setRestClient(RestClient restClient) {
         this.restClient = restClient;
     }
@@ -46,42 +33,28 @@ public class ContentModerationService {
             return;
         }
 
+        // 1. Executa a verificação local de dados sensíveis e spam
         checkPIIAndSpam(text);
 
+        // 2. Consulta a API da PurgoMalum enviando o texto via Query Parameter
         try {
-            ModerationResponse response = restClient.post()
-                    .uri(openAiUrl)
-                    .header("Authorization", "Bearer " + apiKey)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(new ModerationRequest(text))
+            String response = restClient.get()
+                    .uri(PURGOMALUM_URL + "?text={text}", text)
                     .retrieve()
-                    .body(ModerationResponse.class);
+                    .body(String.class);
 
-            if (response == null || response.results() == null || response.results().isEmpty()) {
-                throw new ModerationServiceException("The moderation API returned an invalid or empty response.");
-            }
+            boolean isProfane = Boolean.parseBoolean(response);
 
-            if (response.results().get(0).flagged()) {
-                // Lança ContentModerationException para violação de regras da comunidade
+            if (isProfane) {
                 throw new ContentModerationException("The submitted content violates the terms of use and community guidelines.");
             }
 
-        } catch (ResourceAccessException e) {
-            throw new ModerationServiceException("The moderation service is temporarily unavailable (Timeout/Network). The post has been blocked.", e);
-        } catch (HttpClientErrorException e) {
-            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-                throw new ModerationServiceException("Internal authentication error with the moderation service.", e);
-            } else if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
-                throw new ModerationServiceException("Moderation request limit exceeded. Please try again in a few moments.", e);
-            }
-            throw new ModerationServiceException("Error in the request for the moderation service: " + e.getStatusCode(), e);
-        } catch (HttpServerErrorException e) {
-            throw new ModerationServiceException("The content moderation server experienced instability (" + e.getStatusCode() + ").", e);
+        } catch (ContentModerationException e) {
+            throw e;
         } catch (Exception e) {
-            if (e instanceof ContentModerationException || e instanceof ModerationServiceException) {
-                throw e;
-            }
-            throw new ModerationServiceException("Content moderation failed.", e);
+            System.err.println("Erro na chamada da API PurgoMalum: " + e.getMessage());
+            // Lança a exceção esperada pelo teste quando a API falhar
+            throw new ModerationServiceException("Error contacting external moderation service", e);
         }
     }
 
@@ -90,7 +63,6 @@ public class ContentModerationService {
             throw new ContentModerationException("Content contains private personal information (CPF, email, or phone number).");
         }
 
-        // Bloqueio de spam por excesso de links
         long urlCount = URL_SPAM_PATTERN.matcher(text).results().count();
         if (urlCount > 2) {
             throw new ContentModerationException("Content flagged as spam due to excessive external links.");

@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viniciuskz.anonymousstories.dto.StoryRequestDTO;
 import com.viniciuskz.anonymousstories.dto.StoryResponseDTO;
 import com.viniciuskz.anonymousstories.entity.User;
+import com.viniciuskz.anonymousstories.exception.GlobalExceptionHandler;
+import com.viniciuskz.anonymousstories.exception.ResourceNotFoundException;
 import com.viniciuskz.anonymousstories.service.StoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,7 +47,7 @@ public class StoryControllerTest {
     @BeforeEach
     void setUp(){
         this.mockMvc = MockMvcBuilders.standaloneSetup(storyController)
-                .setControllerAdvice(new com.viniciuskz.anonymousstories.exception.GlobalExceptionHandler())
+                .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
 
@@ -85,7 +87,7 @@ public class StoryControllerTest {
     @DisplayName("It should return status 404 Not Found when story ID does not exist")
     void getStoryById_ShouldReturnNotFound() throws Exception {
         when(storyService.findById(99L))
-                .thenThrow(new com.viniciuskz.anonymousstories.exception.ResourceNotFoundException("Story not found"));
+                .thenThrow(new ResourceNotFoundException("Story not found"));
 
         mockMvc.perform(get("/stories/99")
                 .accept(MediaType.APPLICATION_JSON))

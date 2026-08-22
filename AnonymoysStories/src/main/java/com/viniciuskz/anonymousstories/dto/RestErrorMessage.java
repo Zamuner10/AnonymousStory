@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatus;
 
 
     public record RestErrorMessage(
-            int Stauts,
+            int Status,
             String error,
             String message
     ){

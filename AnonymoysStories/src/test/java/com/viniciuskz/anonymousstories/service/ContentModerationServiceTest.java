@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -27,32 +28,37 @@ public class ContentModerationServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Instancia o builder e o mockServer sem depender do Autowired
         RestClient.Builder builder = RestClient.builder();
-        this.mockServer = MockRestServiceServer.bindTo(builder).build();
-        this.moderationService.setRestClient(builder.build());
+        mockServer = MockRestServiceServer.bindTo(builder).build();
+
+        // Injeta o RestClient mockado no serviço
+        moderationService.setRestClient(builder.build());
     }
 
     @Test
     @DisplayName("Should approve safe content")
     void validateText_Approved() {
-        String mockResponse = "{\"results\":[{\"flagged\":false}]}";
+        String cleanText = "A report on a normal and productive day.";
 
-        this.mockServer.expect(requestTo("https://api.openai.com/v1/moderations"))
-                .andRespond(withSuccess().body(mockResponse).contentType(MediaType.APPLICATION_JSON));
+        mockServer.expect(requestTo(containsString("purgomalum.com")))
+                .andRespond(withSuccess("false", MediaType.TEXT_PLAIN));
 
-        assertDoesNotThrow(() -> this.moderationService.validateText("A report on a normal and productive day."));
+        assertDoesNotThrow(() -> moderationService.validateText(cleanText));
+        mockServer.verify();
     }
 
     @Test
     @DisplayName("Should reject content flagged as a violation by the API")
     void validateText_RejectedByApi() {
-        String mockResponse = "{\"results\":[{\"flagged\":true}]}";
+        String badText = "Text with prohibited speech";
 
-        this.mockServer.expect(requestTo("https://api.openai.com/v1/moderations"))
-                .andRespond(withSuccess().body(mockResponse).contentType(MediaType.APPLICATION_JSON));
+        mockServer.expect(requestTo(containsString("purgomalum.com")))
+                .andRespond(withSuccess("true", MediaType.TEXT_PLAIN));
 
-        assertThrows(ContentModerationException.class, () ->
-                this.moderationService.validateText("Text with prohibited speech"));
+        assertThrows(ContentModerationException.class,
+                () -> moderationService.validateText(badText));
+        mockServer.verify();
     }
 
     @Test
@@ -65,10 +71,12 @@ public class ContentModerationServiceTest {
     @Test
     @DisplayName("Should throw ModerationServiceException when the external API is unavailable")
     void validateText_ApiUnavailable() {
-        this.mockServer.expect(requestTo("https://api.openai.com/v1/moderations"))
-                .andRespond(withServerError());
+            mockServer.expect(requestTo(containsString("purgomalum.com")))
+                    .andRespond(withServerError()); // Simula resposta 500
 
-        assertThrows(ModerationServiceException.class, () ->
-                this.moderationService.validateText("Any text for analysis"));
-    }
+            assertThrows(ModerationServiceException.class, () ->
+                    this.moderationService.validateText("Any text for analysis"));
+
+            mockServer.verify();
+        }
 }

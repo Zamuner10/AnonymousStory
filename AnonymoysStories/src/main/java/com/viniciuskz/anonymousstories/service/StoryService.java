@@ -32,7 +32,7 @@ public class StoryService {
     @Transactional
     public StoryResponseDTO createStory(StoryRequestDTO dto, User user) {
 
-        contentModerationService.validateText(dto.title() + " " + dto.content()); //valida titulo e conteúdo juntos na API de IA
+        contentModerationService.validateText(dto.title() + " " + dto.content());
 
         Story story = new Story();
         story.setTitle(dto.title());
