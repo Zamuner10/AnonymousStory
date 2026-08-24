@@ -17,8 +17,10 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @SpringBootTest(properties = {
-        "api.security.token.secret=my-secret-key-for-testing-purposes-only-1234567890",
-        "GMAIL_PASSWORD=dummy-mail-password"
+        "spring.autoconfigure.exclude=" +
+                "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration," +
+                "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration," +
+                "org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration"
 })
 public class ContentModerationServiceIntegrationTest {
 
