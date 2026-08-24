@@ -32,7 +32,7 @@ public class LoginController {
 
         ResponseCookie cookie = ResponseCookie.from("jwtToken", token)
                 .httpOnly(true)
-                .secure(false)
+                .secure(isSecureCookie)
                 .maxAge(Duration.ofHours(2))
                 .sameSite("Lax")
                 .build();
