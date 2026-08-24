@@ -4,10 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record StoryRequestDTO(
-        @NotBlank(message = "O título não pode estar em branco")
-        @Size(max = 100, message = "O título deve ter no máximo 100 caracteres")
+        @NotBlank(message = "Title is requerid")
+        @Size(min = 5,  max = 80, message = "Title must be between 5 and 80 characters")
         String title,
 
-        @NotBlank(message = "O conteúdo da história não pode estar em branco")
+        @NotBlank(message = "Content is requerid")
+        @Size(min = 30, max = 500, message = "Content must be between 30 and 500 characters")
         String content
 ) {}

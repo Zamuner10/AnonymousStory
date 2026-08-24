@@ -21,7 +21,7 @@ public record UserRequestDTO (
     String confirmPassword,
 
     @NotNull (message = "Age is required")
-    @Min(value = 12, message= "Age must be at least 12")
+    @Min(value = 13, message= "User must be at least 13 years old")
     Integer age
 
             ){}

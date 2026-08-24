@@ -16,7 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-@SpringBootTest
+@SpringBootTest(properties = {
+        "api.security.token.secret=my-secret-key-for-testing-purposes-only-1234567890",
+        "GMAIL_PASSWORD=dummy-mail-password"
+})
 public class ContentModerationServiceIntegrationTest {
 
     @Autowired
@@ -26,18 +29,14 @@ public class ContentModerationServiceIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Criamos um builder limpo para CADA teste individual
         RestClient.Builder builder = RestClient.builder();
         mockServer = MockRestServiceServer.bindTo(builder).build();
-
-        // Injetamos o cliente configurado diretamente via setter
         contentModerationService.setRestClient(builder.build());
     }
 
     @Test
     @DisplayName("Deve aprovar frase comum em português")
     void testSafeText() {
-        // PurgoMalum retorna "false" para texto sem palavrões
         mockServer.expect(requestTo(containsString("purgomalum.com")))
                 .andRespond(withSuccess("false", MediaType.TEXT_PLAIN));
 
@@ -51,7 +50,6 @@ public class ContentModerationServiceIntegrationTest {
     @Test
     @DisplayName("Deve bloquear texto com conteúdo impróprio")
     void testUnsafeTest() {
-        // PurgoMalum retorna "true" quando detecta profanidade
         mockServer.expect(requestTo(containsString("purgomalum.com")))
                 .andRespond(withSuccess("true", MediaType.TEXT_PLAIN));
 

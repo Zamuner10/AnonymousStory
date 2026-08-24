@@ -2,7 +2,6 @@ package com.viniciuskz.anonymousstories.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.viniciuskz.anonymousstories.dto.LoginRequestDTO;
-import com.viniciuskz.anonymousstories.dto.LoginResponseDTO;
 import com.viniciuskz.anonymousstories.exception.GlobalExceptionHandler;
 import com.viniciuskz.anonymousstories.exception.UserNotVerifiedException;
 import com.viniciuskz.anonymousstories.service.LoginService;
@@ -15,12 +14,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import static org.hamcrest.Matchers.containsString;
 
 @ExtendWith(MockitoExtension.class)
 public class LoginControllerTest {
@@ -42,24 +44,26 @@ public class LoginControllerTest {
                 .build();
     }
 
-
     @Test
-    @DisplayName("Should return 200 OK and token on successful login")
+    @DisplayName("Should return 200 OK, Set-Cookie header and success message on valid login")
     void login_Sucess() throws Exception {
 
-        //ARRANGE
+        // ARRANGE
         LoginRequestDTO request = new LoginRequestDTO("user@email.com", "123456");
-        LoginResponseDTO response = new LoginResponseDTO(1L, "Test user", "user@email.com", "mocked-jwt-token");
 
+        // O loginService agora retorna a String do token
         Mockito.when(this.loginService.login(ArgumentMatchers.any(LoginRequestDTO.class)))
-                        .thenReturn(response);
+                .thenReturn("mocked-jwt-token");
 
+        // ACT & ASSERT
         this.mockMvc.perform(MockMvcRequestBuilders.post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(request)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.token").value("mocked-jwt-token"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value("user@email.com"));
+                .andExpect(MockMvcResultMatchers.header().exists(HttpHeaders.SET_COOKIE))
+                .andExpect(MockMvcResultMatchers.header().string(HttpHeaders.SET_COOKIE, containsString("jwtToken=mocked-jwt-token")))
+                .andExpect(MockMvcResultMatchers.header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Login successful"));
     }
 
     @Test
@@ -71,22 +75,21 @@ public class LoginControllerTest {
                 .thenThrow(new BadCredentialsException("Invalid credentials"));
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(this.objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(request)))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
-
 
     @Test
     @DisplayName("Should return 403 Forbidden when user is not verified")
     void login_UserNotVerified_ReturnsForBidden() throws Exception{
-        LoginRequestDTO request =  new LoginRequestDTO("unverified@email.com", "123456");
+        LoginRequestDTO request = new LoginRequestDTO("unverified@email.com", "123456");
         Mockito.when(this.loginService.login(ArgumentMatchers.any(LoginRequestDTO.class)))
                 .thenThrow(new UserNotVerifiedException("User email not verified"));
 
         this.mockMvc.perform(MockMvcRequestBuilders.post("/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(this.objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(this.objectMapper.writeValueAsString(request)))
                 .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 }

@@ -31,9 +31,10 @@ UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@Valid @RequestBody UserRequestDTO dto) {
+    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestDTO dto) {
         User registeredUser = userService.registerUser(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(registeredUser);
+        UserResponseDTO response = new UserResponseDTO(registeredUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/me")

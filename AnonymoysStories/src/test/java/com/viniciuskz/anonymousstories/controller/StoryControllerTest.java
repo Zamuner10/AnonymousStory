@@ -54,18 +54,20 @@ public class StoryControllerTest {
     @Test
     @DisplayName("It should return status 201 Created when creating a story.")
     void createStory_ShouldReturnCreated() throws Exception {
-        StoryRequestDTO requestDTO = new StoryRequestDTO("Title Web", "HTTP request content...");
-        StoryResponseDTO responseDTO = new StoryResponseDTO(1L, "Title Web", "HTTP request content...", LocalDateTime.now());
+        StoryRequestDTO requestDTO = new StoryRequestDTO("Title Web Test", "HTTP request content for testing story creation...");
+        StoryResponseDTO responseDTO = new StoryResponseDTO(1L, "Title Web Test", "HTTP request content for testing story creation...", LocalDateTime.now());
 
-        when(storyService.createStory(any(StoryRequestDTO.class), any(User.class))).thenReturn(responseDTO);
+        // Passa os 2 argumentos exigidos pelo método do StoryService (DTO e User)
+        when(storyService.createStory(any(StoryRequestDTO.class), org.mockito.ArgumentMatchers.nullable(User.class)))
+                .thenReturn(responseDTO);
 
         mockMvc.perform(post("/stories")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isCreated())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
                 .andDo(print())
-                .andExpect(jsonPath("$.title").value("Title Web"))
-                .andExpect(jsonPath("$.content").value("HTTP request content..."));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.title").value("Title Web Test"))
+                .andExpect(jsonPath("$.content").value("HTTP request content for testing story creation..."));
     }
 
     @Test

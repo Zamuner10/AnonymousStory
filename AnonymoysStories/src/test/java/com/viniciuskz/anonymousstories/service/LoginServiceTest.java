@@ -1,7 +1,6 @@
 package com.viniciuskz.anonymousstories.service;
 
 import com.viniciuskz.anonymousstories.dto.LoginRequestDTO;
-import com.viniciuskz.anonymousstories.dto.LoginResponseDTO;
 import com.viniciuskz.anonymousstories.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +25,9 @@ public class LoginServiceTest {
     @Mock
     private TokenService tokenService;
 
+    @Mock
+    private Authentication authentication;
+
     @InjectMocks
     private LoginService loginService;
 
@@ -33,7 +35,7 @@ public class LoginServiceTest {
     @DisplayName("Should authenticate user and return token successfully")
     void login_Sucess(){
 
-        //ARRANGE
+        // ARRANGE
         LoginRequestDTO requestDTO = new LoginRequestDTO("test@email.com", "123456");
 
         User mockUser = new User();
@@ -41,24 +43,19 @@ public class LoginServiceTest {
         mockUser.setName("Test user");
         mockUser.setEmail("test@email.com");
 
-        Authentication authentication = mock(Authentication.class);
         when(authentication.getPrincipal()).thenReturn(mockUser);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
         when(tokenService.generateToken(mockUser)).thenReturn("mocked-jwt-token");
 
-        //ACT
-        LoginResponseDTO response = loginService.login(requestDTO);
+        // ACT
+        String token = loginService.login(requestDTO);
 
-        //ASSERT
-        assertNotNull(response);
-        assertEquals(1L, response.getId());
-        assertEquals("Test user", response.getName());
-        assertEquals("test@email.com", response.getEmail());
-        assertEquals("mocked-jwt-token", response.getToken());
+        // ASSERT
+        assertNotNull(token);
+        assertEquals("mocked-jwt-token", token);
 
         verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
         verify(tokenService, times(1)).generateToken(mockUser);
     }
-
 }

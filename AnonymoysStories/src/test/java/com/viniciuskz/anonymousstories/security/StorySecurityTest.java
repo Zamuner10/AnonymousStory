@@ -45,9 +45,12 @@ public class StorySecurityTest {
     @Test
     @DisplayName("User A attempting to edit User B's Story should return 403 Forbidden")
     void userA_CannotEdit_UserBStory() throws Exception {
-        StoryRequestDTO updateDto = new StoryRequestDTO("Edited Title", "Edited Content");
+        // Textos longos para garantir o cumprimento das regras de Bean Validation (@Size)
+        StoryRequestDTO updateDto = new StoryRequestDTO(
+                "Edited Title Valid",
+                "This is valid content with enough length to bypass DTO validation rules smoothly."
+        );
 
-        // Adicionado o any() para cobrir o 3º parâmetro do método updateStory
         Mockito.when(this.storyService.updateStory(eq(1L), any(StoryRequestDTO.class), any()))
                 .thenThrow(new AccessDeniedException("You do not have permission to edit this story"));
 
@@ -62,7 +65,6 @@ public class StorySecurityTest {
     void userA_CannotDelete_UserBStory() throws Exception {
         Mockito.doThrow(new AccessDeniedException("You do not have permission to delete this story"))
                 .when(this.storyService).deleteStory(eq(1L), any());
-
 
         this.mockMvc.perform(MockMvcRequestBuilders.delete("/stories/1"))
                 .andExpect(MockMvcResultMatchers.status().isForbidden());

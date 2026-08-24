@@ -11,6 +11,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+
 @RestController
 @RequestMapping("/login")
 public class LoginController {
@@ -25,18 +27,18 @@ public class LoginController {
     }
 
     @PostMapping
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO request, HttpServletResponse response) {
-        LoginResponseDTO loginResponse = loginService.login(request);
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO dto, HttpServletResponse response) {
+        String token = loginService.login(dto);
 
-        ResponseCookie cookie = ResponseCookie.from("accessToken", loginResponse.getToken())
+        ResponseCookie cookie = ResponseCookie.from("jwtToken", token)
                 .httpOnly(true)
-                .secure(isSecureCookie)
-                .path("/")
-                .maxAge(7*24*60*60)
+                .secure(false)
+                .maxAge(Duration.ofHours(2))
                 .sameSite("Lax")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        return ResponseEntity.ok(loginResponse);
+
+        return ResponseEntity.ok(new LoginResponseDTO("Login successful"));
     }
 }

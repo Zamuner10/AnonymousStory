@@ -5,8 +5,6 @@ import com.viniciuskz.anonymousstories.exception.ModerationServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
@@ -18,17 +16,17 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-@SpringBootTest
 public class ContentModerationServiceTest {
 
-    @Autowired
     private ContentModerationService moderationService;
-
     private MockRestServiceServer mockServer;
 
     @BeforeEach
     void setUp() {
-        // Instancia o builder e o mockServer sem depender do Autowired
+        // Instancia o serviço diretamente via java, sem subir o Spring Boot
+        moderationService = new ContentModerationService();
+
+        // Instancia o builder e o mockServer
         RestClient.Builder builder = RestClient.builder();
         mockServer = MockRestServiceServer.bindTo(builder).build();
 
@@ -71,12 +69,12 @@ public class ContentModerationServiceTest {
     @Test
     @DisplayName("Should throw ModerationServiceException when the external API is unavailable")
     void validateText_ApiUnavailable() {
-            mockServer.expect(requestTo(containsString("purgomalum.com")))
-                    .andRespond(withServerError()); // Simula resposta 500
+        mockServer.expect(requestTo(containsString("purgomalum.com")))
+                .andRespond(withServerError()); // Simula resposta 500
 
-            assertThrows(ModerationServiceException.class, () ->
-                    this.moderationService.validateText("Any text for analysis"));
+        assertThrows(ModerationServiceException.class, () ->
+                this.moderationService.validateText("Any text for analysis"));
 
-            mockServer.verify();
-        }
+        mockServer.verify();
+    }
 }
