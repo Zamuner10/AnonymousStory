@@ -5,6 +5,7 @@ import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +20,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    @Async
     public void sendVerificationEmail(String toEmail, String token) {
         String confirmationUrl = baseUrl + "/users/verify?token=" + token;
 
@@ -41,7 +43,7 @@ public class EmailService {
         <tr>
           <td align="center" style="padding: 40px 16px;">
             
-            <!-- Card Principal (Equivalent to Tailwind: bg-white rounded-2xl shadow-lg border border-slate-100) -->
+            <!-- Card Principal -->
             <table border="0" cellpadding="0" cellspacing="0" width="100%%" style="max-width: 480px; background-color: #ffffff; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); overflow: hidden; text-align: center;">
               
               <!-- Cabeçalho -->
@@ -61,7 +63,7 @@ public class EmailService {
                     Obrigado por se cadastrar! Clique no botão abaixo para ativar sua conta e liberar o seu acesso para publicação.
                   </p>
                   
-                  <!-- Botão de Ação (Equivalent to Tailwind: bg-blue-600 rounded-xl px-6 py-3.5 text-white font-semibold) -->
+                  <!-- Botão de Ação -->
                   <table border="0" cellpadding="0" cellspacing="0" width="100%%">
                     <tr>
                       <td align="center">
@@ -80,7 +82,7 @@ public class EmailService {
                 </td>
               </tr>
 
-              <!-- Rodapé (Equivalent to Tailwind: bg-slate-50 text-slate-400) -->
+              <!-- Rodapé -->
               <tr>
                 <td style="background-color: #f8fafc; padding: 20px 32px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8; line-height: 1.5;">
                   Se você não solicitou este cadastro, ignore este e-mail.<br>
