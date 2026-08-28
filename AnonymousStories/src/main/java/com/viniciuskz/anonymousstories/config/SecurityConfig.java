@@ -1,6 +1,7 @@
 package com.viniciuskz.anonymousstories.config;
 
 import com.viniciuskz.anonymousstories.service.CustomUserDetailsService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -22,6 +23,8 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+    @Value("{app.cors.allowed-origins}")
+    private List <String> setAllowedOrigins;
 
     private final CustomUserDetailsService customUserDetailsService;
 
@@ -45,7 +48,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/verify").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
                                         .requestMatchers(
                                                 "/v3/api-docs/**",
                                                 "/swagger-ui/**",
@@ -67,8 +69,7 @@ public class SecurityConfig {
         // Aceita o React local (5173/3000) e qualquer outra origem durante o desenvolvimento
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "http://localhost:3000",
-                "*"));
+                "http://localhost:3000"));
 
         // Libera todos os cabeçalhos para o Swagger e ferramentas REST não serem bloqueados
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

@@ -34,7 +34,7 @@ public class LoginController {
                 .httpOnly(true)
                 .secure(isSecureCookie)
                 .maxAge(Duration.ofHours(2))
-                .sameSite("Lax")
+                .sameSite("None")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
