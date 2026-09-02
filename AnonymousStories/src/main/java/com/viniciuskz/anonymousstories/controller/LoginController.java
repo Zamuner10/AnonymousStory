@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
 
 @RestController
-@RequestMapping("/login")
+@RequestMapping
 public class LoginController {
 
     private final LoginService loginService;
@@ -26,7 +26,7 @@ public class LoginController {
         this.loginService = loginService;
     }
 
-    @PostMapping
+    @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO dto, HttpServletResponse response) {
         String token = loginService.login(dto);
 
@@ -40,5 +40,18 @@ public class LoginController {
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok(new LoginResponseDTO("Login successful"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response){
+        ResponseCookie cookei = ResponseCookie.from("jwtToken", "")
+                .httpOnly(true)
+                .secure(isSecureCookie)
+                .path("/")
+                .maxAge(0)
+                .sameSite("None")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookei.toString());
+        return ResponseEntity.ok().build();
     }
 }

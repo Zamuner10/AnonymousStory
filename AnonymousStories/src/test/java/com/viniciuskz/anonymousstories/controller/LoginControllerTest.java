@@ -17,12 +17,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 public class LoginControllerTest {
@@ -56,13 +60,13 @@ public class LoginControllerTest {
                 .thenReturn("mocked-jwt-token");
 
         // ACT & ASSERT
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/login")
+        this.mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(request)))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.header().exists(HttpHeaders.SET_COOKIE))
-                .andExpect(MockMvcResultMatchers.header().string(HttpHeaders.SET_COOKIE, containsString("jwtToken=mocked-jwt-token")))
-                .andExpect(MockMvcResultMatchers.header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")))
+                .andExpect(status().isOk())
+                .andExpect(header().exists(HttpHeaders.SET_COOKIE))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("jwtToken=mocked-jwt-token")))
+                .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Login successful"));
     }
 
@@ -74,10 +78,10 @@ public class LoginControllerTest {
         Mockito.when(this.loginService.login(ArgumentMatchers.any(LoginRequestDTO.class)))
                 .thenThrow(new BadCredentialsException("Invalid credentials"));
 
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/login")
+        this.mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(request)))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -87,9 +91,27 @@ public class LoginControllerTest {
         Mockito.when(this.loginService.login(ArgumentMatchers.any(LoginRequestDTO.class)))
                 .thenThrow(new UserNotVerifiedException("User email not verified"));
 
-        this.mockMvc.perform(MockMvcRequestBuilders.post("/login")
+        this.mockMvc.perform(post("/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(request)))
-                .andExpect(MockMvcResultMatchers.status().isForbidden());
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Should successfully logout authenticated user by clearing the jwtToken cookie")
+    @WithMockUser(username = "auth@email.com")
+    void logout_AuthenticateUser_ShouldReturn200AndClearCookie() throws Exception{
+        mockMvc.perform(post("/logout"))
+                .andExpect(status().isOk())
+                .andExpect(header().exists("Set-Cookie"))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("jwtToken=;")))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Max-Age=0")));
+    }
+
+    @Test
+    @DisplayName("It should return a 401 Unauthorized error when attempting to log out without being authenticated.")
+    void logout_UnauthenticatedUser_Return401Unauthorized() throws Exception {
+        mockMvc.perform(post("/logout"))
+                .andExpect(status().isUnauthorized());
     }
 }

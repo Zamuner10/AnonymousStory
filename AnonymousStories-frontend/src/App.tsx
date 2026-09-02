@@ -1,27 +1,32 @@
-import {useState} from 'react';
-import {Home} from './pages/Home';
-import {Login} from './pages/Login';
-import Register from './pages/Register';
+import { Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { Home } from "./pages/Home";
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
+import { ReadLetters } from "./pages/ReadLetters";
+import { ProtectedRoute } from "./components/ProtectedRoute"; // <-- Importação adicionada
+import { CreateStory } from "./pages/CreateStory"; // <-- Importação adicionada
 
-export default function App(){
+// IMPORTANTE: não colocar <BrowserRouter> aqui dentro. O BrowserRouter deve existir em UM lugar só.
 
-  //Estado para controlar qual tela visivel na página
- const [currentPage, setCurrentPage] = useState('home');
-
+export default function App() {
   return (
-    <main className="w-full min-h-screen" >
-    {currentPage == 'home' && (
-      <Home onNavigate={(page: string) => setCurrentPage(page)} />
-    )}
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/feed" element={<ReadLetters />} />
 
-    {currentPage == 'login' &&(
-    <Login onNavigate={(page: string) => setCurrentPage(page)} />
-    )}
-
-    {currentPage == 'register' && (
-      <Register onNavigate={(page: string) => setCurrentPage(page)} />
-    )}
-
-    </main>
+        <Route 
+          path="/write" 
+          element={
+            <ProtectedRoute>
+              <CreateStory />
+            </ProtectedRoute>
+          } 
+        />
+      </Routes>
+    </AuthProvider>
   );
 }

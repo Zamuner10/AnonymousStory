@@ -48,7 +48,8 @@ public class StorySecurityTest {
         // Textos longos para garantir o cumprimento das regras de Bean Validation (@Size)
         StoryRequestDTO updateDto = new StoryRequestDTO(
                 "Edited Title Valid",
-                "This is valid content with enough length to bypass DTO validation rules smoothly."
+                "This is valid content with enough length to bypass DTO validation rules smoothly.",
+                true
         );
 
         Mockito.when(this.storyService.updateStory(eq(1L), any(StoryRequestDTO.class), any()))

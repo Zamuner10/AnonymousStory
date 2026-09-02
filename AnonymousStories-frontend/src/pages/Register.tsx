@@ -1,12 +1,10 @@
-import React, { useState } from "react"
-import axios from "axios"
-import Background from "../components/Background"
-import { SketchInput, SketchButton, Label, SketchDivider } from "../components/SketchUI"
-import { api } from "../services/api"
-
-interface RegisterProps {
-  onNavigate: (page: string) => void
-}
+// src/pages/Register.tsx
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import Background from "../components/Background";
+import { SketchInput, SketchButton, Label, SketchDivider } from "../components/SketchUI";
+import { api } from "../services/api";
 
 function FormBox({ children }: { children: React.ReactNode }) {
   return (
@@ -36,41 +34,42 @@ function FormBox({ children }: { children: React.ReactNode }) {
         {children}
       </div>
     </div>
-  )
+  );
 }
 
-export default function Register({ onNavigate }: RegisterProps) {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [age, setAge] = useState("")
+export function Register() {
+  const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [age, setAge] = useState("");
 
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [successMessage, setSuccessMessage] = useState("")
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setSuccessMessage("")
+    e.preventDefault();
+    setError("");
+    setSuccessMessage("");
 
     if (!name || !email || !password || !confirmPassword || age === "") {
-      setError("Por favor, preencha todos os campos.")
-      return
+      setError("Por favor, preencha todos os campos.");
+      return;
     }
 
     if (password !== confirmPassword) {
-      setError("As senhas não coincidem!")
-      return
+      setError("As senhas não coincidem!");
+      return;
     }
 
-    if (Number(age) < 12) {
-      setError("Você precisa ter pelo menos 12 anos.")
-      return
+    if (Number(age) < 13) {
+      setError("Você precisa ter pelo menos 13 anos.");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
       await api.post("/users", {
@@ -79,19 +78,19 @@ export default function Register({ onNavigate }: RegisterProps) {
         password,
         confirmPassword,
         age: Number(age),
-      })
+      });
 
-      setSuccessMessage("Conta criada com sucesso! Verifique seu e-mail para confirmar seu cadastro.")
+      setSuccessMessage("Conta criada com sucesso! Verifique seu e-mail para confirmar seu cadastro.");
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Erro ao realizar cadastro.")
+        setError(err.response?.data?.message || "Erro ao realizar cadastro.");
       } else {
-        setError("Ocorreu um erro inesperado ao conectar ao servidor.")
+        setError("Ocorreu um erro inesperado ao conectar ao servidor.");
       }
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="relative w-full min-h-screen overflow-y-auto py-6 flex items-center justify-center bg-[#f7f3eb]">
@@ -121,7 +120,7 @@ export default function Register({ onNavigate }: RegisterProps) {
       <div className="relative z-10 flex flex-col items-center my-auto">
         {/* Logo superior */}
         <button 
-          onClick={() => onNavigate("home")} 
+          onClick={() => navigate("/")} 
           className="bg-transparent border-none cursor-pointer mb-2 group touch-manipulation"
         >
           <span className="font-['Caveat'] text-[26px] font-bold text-[#1a1208] group-hover:opacity-80 active:opacity-60 transition-opacity">
@@ -165,7 +164,7 @@ export default function Register({ onNavigate }: RegisterProps) {
               <p className="font-['Caveat'] text-[18px] text-[#15803d] mb-3">
                 {successMessage}
               </p>
-              <SketchButton seed={52} variant="primary" onClick={() => onNavigate("login")}>
+              <SketchButton seed={52} variant="primary" onClick={() => navigate("/login")}>
                 Ir para o Login
               </SketchButton>
             </div>
@@ -234,7 +233,7 @@ export default function Register({ onNavigate }: RegisterProps) {
                 suas histórias de forma anônima e respeitosa
               </p>
 
-              {/* Botão de Cadastrar padronizado com o estilo da Home Page */}
+              {/* Botão de Cadastrar padronizado */}
               <div className="mt-1 transition-all duration-200 hover:opacity-90 active:scale-[0.98] touch-manipulation">
                 <SketchButton seed={51} variant="primary" type="submit">
                   {loading ? "Criando..." : "Criar conta"}
@@ -247,7 +246,7 @@ export default function Register({ onNavigate }: RegisterProps) {
                 <span className="font-['Caveat'] text-[20px] text-[#5a4020]">já tem uma conta?{" "}</span>
                 <button 
                   type="button" 
-                  onClick={() => onNavigate("login")} 
+                  onClick={() => navigate("/login")} 
                   className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[20px] text-[#b07030] hover:text-[#1a1208] active:text-[#1a1208] underline p-0 transition-colors touch-manipulation"
                 >
                   entrar
@@ -257,15 +256,15 @@ export default function Register({ onNavigate }: RegisterProps) {
           )}
         </FormBox>
 
-        {/* Botão de Voltar com Hover Invertido */}
+        {/* Botão de Voltar para o início */}
         <button 
           type="button" 
-          onClick={() => onNavigate("home")} 
+          onClick={() => navigate("/")} 
           className="mt-3 px-4 py-[5px] bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[17px] font-bold text-[#1a1208] flex items-center gap-[6px] hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] focus:bg-[#1a1208] focus:text-[#f7f3eb] transition-colors shadow-sm select-none touch-manipulation"
         >
           voltar para o início
         </button>
       </div>
     </div>
-  )
+  );
 }

@@ -24,20 +24,24 @@ public class Story {
     private String content;
 
     
-    @Column(nullable = false)
+    @Column(nullable = false, name="created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @ManyToOne
+    @ManyToOne(fetch= FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean anonymous =true;
+
     public Story(){}
-    public Story(Long id, String title, String content, LocalDateTime createdAt, User user){
+    public Story(Long id, String title, String content, LocalDateTime createdAt, User user, boolean anonymous){
         this.id = id;
         this.title = title;
         this.content = content;
         this.createdAt = createdAt;
         this.user = user;
+        this.anonymous = anonymous;
     }
 
     public void setId(Long id){
@@ -76,5 +80,8 @@ public class Story {
     public User getUser(){
         return user;
     }
+
+    public void setAnonymous(boolean anonymous){this.anonymous = anonymous;}
+    public Boolean isAnonymous(){return anonymous;}
 
 }

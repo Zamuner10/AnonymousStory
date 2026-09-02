@@ -1,12 +1,11 @@
+// src/pages/Login.tsx
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import Background from "../components/Background";
 import { SketchInput, SketchButton, Label, SketchDivider } from "../components/SketchUI";
 import { api } from "../services/api";
-
-interface LoginProps {
-  onNavigate: (page: string) => void;
-}
+import { useAuth } from "../contexts/AuthContext";
 
 function FormBox({ children }: { children: React.ReactNode }) {
   return (
@@ -51,7 +50,9 @@ function FormBox({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function Login({ onNavigate }: LoginProps) {
+export function Login() {
+  const navigate = useNavigate();
+  const { checkAuth } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -63,8 +64,19 @@ export function Login({ onNavigate }: LoginProps) {
     setLoading(true);
 
     try {
-      await api.post("/auth/login", { email, password });
-      onNavigate("write");
+      // MANTIDO CORRETO: POST /login (sem /auth)
+      await api.post("/login", { email, password });
+
+      // CORREÇÃO: depois do login dar certo, o cookie já está salvo no
+      // navegador, mas o AuthContext ainda não sabe disso — ele só busca
+      // "quem está logado" uma vez, quando o app carrega. Sem chamar
+      // checkAuth() aqui e ESPERAR ele terminar (await), a tela /write
+      // (protegida) checa isAuthenticated antes do contexto atualizar,
+      // acha que ninguém está logado, e manda de volta pro /login — que
+      // era exatamente o bug: login "funcionava" mas voltava pro login.
+      await checkAuth();
+
+      navigate("/write");
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.message || "E-mail ou senha incorretos.");
@@ -105,8 +117,8 @@ export function Login({ onNavigate }: LoginProps) {
 
       <div className="relative z-10 flex flex-col items-center my-auto">
         {/* Logotipo */}
-        <button 
-          onClick={() => onNavigate("home")} 
+        <button
+          onClick={() => navigate("/")}
           className="bg-transparent border-none cursor-pointer mb-[28px] group touch-manipulation"
         >
           <span className="font-['Caveat'] text-[28px] font-bold text-[#1a1208] tracking-tight group-hover:opacity-80 active:opacity-60 transition-opacity">
@@ -171,9 +183,9 @@ export function Login({ onNavigate }: LoginProps) {
               </div>
 
               <div className="text-right -mt-[6px]">
-                <button 
-                  type="button" 
-                  onClick={() => onNavigate("forgot")} 
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot")}
                   className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[15px] text-[#b07030] hover:text-[#1a1208] active:text-[#1a1208] underline p-0 transition-colors touch-manipulation"
                 >
                   esqueci minha senha
@@ -191,9 +203,9 @@ export function Login({ onNavigate }: LoginProps) {
 
               <div className="text-center">
                 <span className="font-['Caveat'] text-[16px] text-[#5a4020]">não tem uma conta?{" "}</span>
-                <button 
-                  type="button" 
-                  onClick={() => onNavigate("register")} 
+                <button
+                  type="button"
+                  onClick={() => navigate("/register")}
                   className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[16px] text-[#b07030] hover:text-[#1a1208] active:text-[#1a1208] underline p-0 transition-colors touch-manipulation"
                 >
                   criar conta
@@ -204,12 +216,12 @@ export function Login({ onNavigate }: LoginProps) {
         </FormBox>
 
         {/* Botão de Voltar para o início */}
-        <button 
-          type="button" 
-          onClick={() => onNavigate("home")} 
+        <button
+          type="button"
+          onClick={() => navigate("/")}
           className="mt-[20px] px-4 py-[6px] bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[18px] font-bold text-[#1a1208] flex items-center gap-[6px] hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] focus:bg-[#1a1208] focus:text-[#f7f3eb] transition-colors shadow-sm select-none touch-manipulation"
         >
-        voltar para o início
+          voltar para o início
         </button>
       </div>
     </div>

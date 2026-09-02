@@ -19,9 +19,34 @@ export function SketchInput({
   autoComplete,
 }: SketchInputProps) {
   const filterId = `input-sk-${seed}`;
+  const wrapperClass = `sketch-input-${seed}`;
 
   return (
-    <div style={{ position: 'relative', width: '100%' }}>
+    <div style={{ position: 'relative', width: '100%' }} className={wrapperClass}>
+      {/*
+        Correção do fundo cinza ao digitar: o navegador (Chrome/Edge) pinta
+        o campo com uma cor própria quando reconhece um valor salvo
+        (autofill de e-mail/senha) — isso NÃO é controlável via a
+        propriedade "background" normal, só via esse truque de
+        "box-shadow inset" gigante, que engana o navegador fazendo ele
+        pensar que já pintou o fundo (com a nossa cor de papel), então ele
+        não aplica o cinza/amarelo dele por cima.
+        color-scheme: light garante que o campo sempre use aparência clara,
+        mesmo se o sistema operacional da pessoa estiver no modo escuro.
+      */}
+      <style>{`
+        .${wrapperClass} input {
+          color-scheme: light;
+        }
+        .${wrapperClass} input:-webkit-autofill,
+        .${wrapperClass} input:-webkit-autofill:hover,
+        .${wrapperClass} input:-webkit-autofill:focus {
+          -webkit-text-fill-color: #1a1208;
+          -webkit-box-shadow: 0 0 0 1000px rgba(247,243,235,0.95) inset;
+          box-shadow: 0 0 0 1000px rgba(247,243,235,0.95) inset;
+          transition: background-color 5000s ease-in-out 0s;
+        }
+      `}</style>
       <svg
         style={{
           position: 'absolute',
@@ -103,10 +128,39 @@ export function SketchButton({
   type = 'button',
 }: SketchButtonProps) {
   const filterId = `btn-sk-${seed}`;
+  const wrapperClass = `sketch-btn-${seed}`;
   const isPrimary = variant === 'primary';
 
+  // Cores base (estado normal) e cores de hover — invertidas, igual ao
+  // padrão que já existe nos botões do Home.tsx (fundo escuro que vira
+  // claro no hover, texto que vira escuro).
+  const baseFill = isPrimary ? '#1a1208' : 'transparent';
+  const hoverFill = isPrimary ? '#f7f3eb' : '#1a1208';
+  const baseText = isPrimary ? '#f7f3eb' : '#1a1208';
+  const hoverText = isPrimary ? '#1a1208' : '#f7f3eb';
+
   return (
-    <div style={{ position: 'relative', width: '100%' }}>
+    <div style={{ position: 'relative', width: '100%' }} className={wrapperClass}>
+      {/*
+        O hover precisa ser feito via CSS (pseudo-classe :hover), porque
+        estilo inline do React não tem suporte a isso. Usamos uma classe
+        única por botão (baseada no "seed") pra esse hover não vazar pra
+        outros botões da mesma tela sem querer.
+      */}
+      <style>{`
+        .${wrapperClass} rect {
+          transition: fill 0.2s ease;
+        }
+        .${wrapperClass}:hover rect {
+          fill: ${hoverFill};
+        }
+        .${wrapperClass} button {
+          transition: color 0.2s ease;
+        }
+        .${wrapperClass}:hover button {
+          color: ${hoverText} !important;
+        }
+      `}</style>
       <svg
         style={{
           position: 'absolute',
@@ -141,7 +195,7 @@ export function SketchButton({
           width="calc(100% - 6px)"
           height="calc(100% - 6px)"
           rx="4"
-          fill={isPrimary ? '#1a1208' : 'none'}
+          fill={baseFill}
           stroke="#1a1208"
           strokeWidth={isPrimary ? '0' : '2'}
           filter={`url(#${filterId})`}
@@ -162,7 +216,7 @@ export function SketchButton({
           fontFamily: 'Caveat, cursive',
           fontSize: 20,
           fontWeight: 700,
-          color: isPrimary ? '#f7f3eb' : '#1a1208',
+          color: baseText,
         }}
       >
         {children}

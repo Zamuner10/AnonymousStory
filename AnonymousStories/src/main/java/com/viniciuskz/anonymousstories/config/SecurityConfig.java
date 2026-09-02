@@ -23,7 +23,7 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    @Value("{app.cors.allowed-origins}")
+    @Value("${app.cors.allowed-origins}")
     private List <String> setAllowedOrigins;
 
     private final CustomUserDetailsService customUserDetailsService;
@@ -46,8 +46,10 @@ public class SecurityConfig {
                         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
+//                        .requestMatchers(HttpMethod.POST, "/logout").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users/verify").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/stories/**").permitAll()
                                         .requestMatchers(
                                                 "/v3/api-docs/**",
                                                 "/swagger-ui/**",

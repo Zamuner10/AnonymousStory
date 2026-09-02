@@ -10,5 +10,13 @@ public record StoryRequestDTO(
 
         @NotBlank(message = "Content is requerid")
         @Size(min = 30, max = 500, message = "Content must be between 30 and 500 characters")
-        String content
-) {}
+        String content,
+
+        Boolean anonymous
+) {
+        public StoryRequestDTO{
+                if(anonymous==null){
+                        anonymous=true;
+                }
+        }
+}

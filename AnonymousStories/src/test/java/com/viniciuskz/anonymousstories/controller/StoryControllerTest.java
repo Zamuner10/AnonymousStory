@@ -54,8 +54,8 @@ public class StoryControllerTest {
     @Test
     @DisplayName("It should return status 201 Created when creating a story.")
     void createStory_ShouldReturnCreated() throws Exception {
-        StoryRequestDTO requestDTO = new StoryRequestDTO("Title Web Test", "HTTP request content for testing story creation...");
-        StoryResponseDTO responseDTO = new StoryResponseDTO(1L, "Title Web Test", "HTTP request content for testing story creation...", LocalDateTime.now());
+        StoryRequestDTO requestDTO = new StoryRequestDTO("Title Web Test", "HTTP request content for testing story creation...", true);
+        StoryResponseDTO responseDTO = new StoryResponseDTO(1L, "Title Web Test", "HTTP request content for testing story creation...", true, "Anonymous", LocalDateTime.now());
 
         // Passa os 2 argumentos exigidos pelo método do StoryService (DTO e User)
         when(storyService.createStory(any(StoryRequestDTO.class), org.mockito.ArgumentMatchers.nullable(User.class)))
@@ -73,7 +73,7 @@ public class StoryControllerTest {
     @Test
     @DisplayName("It should return status 200 OK when searching for a story by ID")
     void getStoryById_ShouldReturnOk()throws Exception{
-        StoryResponseDTO responseDTO = new StoryResponseDTO(1L, "History Found", "Content Returned...", LocalDateTime.now());
+        StoryResponseDTO responseDTO = new StoryResponseDTO(1L, "History Found", "Content Returned...", true, "Anonymous", LocalDateTime.now());
 
         when(storyService.findById(1L)).thenReturn(responseDTO);
 
@@ -96,6 +96,4 @@ public class StoryControllerTest {
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
-
-
 }

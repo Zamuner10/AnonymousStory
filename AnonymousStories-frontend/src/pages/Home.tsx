@@ -1,3 +1,5 @@
+// src/pages/Home.tsx
+import { useNavigate } from "react-router-dom";
 import Background from "../components/Background";
 
 function Doodles() {
@@ -143,18 +145,16 @@ function Doodles() {
   );
 }
 
-interface HomeProps {
-  onNavigate: (page: string) => void;
-}
+export function Home() {
+  const navigate = useNavigate();
 
-export function Home({ onNavigate }: HomeProps) {
   return (
     <div className="relative w-full h-screen overflow-hidden flex items-center justify-center bg-[#f7f3eb]">
       <Background fadeStrength="medium" />
       <Doodles />
 
       <div className="relative z-10 text-center px-6 flex flex-col items-center">
-        <span className="font-['Caveat'] text-base text-[#1a1208] text-[25px] tracking-wider mb-4 block ">
+        <span className="font-['Caveat'] text-base text-[#1a1208] text-[25px] tracking-wider mb-4 block">
           um espaço para o que você carrega por dentro
         </span>
 
@@ -239,7 +239,7 @@ export function Home({ onNavigate }: HomeProps) {
               />
             </svg>
             <button
-              onClick={() => onNavigate("login")}
+              onClick={() => navigate("/login")}
               className="relative z-10 w-full h-full px-8 py-[13px] bg-transparent text-[#f7f3eb] group-hover:text-[#1a1208] font-['Caveat'] font-bold text-[19px] border-none cursor-pointer flex items-center justify-center transition-colors duration-200"
             >
               Escrever uma carta
@@ -282,7 +282,7 @@ export function Home({ onNavigate }: HomeProps) {
               />
             </svg>
             <button
-              onClick={() => onNavigate("read")}
+              onClick={() => navigate("/feed")}
               className="relative z-10 w-full h-full px-6 py-[13px] bg-transparent text-[#f7f3eb] group-hover:text-[#1a1208] font-['Caveat'] font-semibold text-[19px] border-none cursor-pointer flex items-center justify-center transition-colors duration-200"
             >
               Ler cartas
