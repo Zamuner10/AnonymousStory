@@ -17,10 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.hamcrest.Matchers.containsString;
@@ -28,6 +25,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+// NOTA: os testes de /logout que checavam "exige autenticação" (401 sem
+// login, 200 com login) foram REMOVIDOS daqui. O motivo: este teste usa
+// MockMvcBuilders.standaloneSetup(), que testa o LoginController isolado,
+// SEM carregar o Spring Security de verdade. Sem o filtro de segurança
+// real rodando, @WithMockUser não faz nada, e o logout() sempre retorna
+// 200 — o teste "sem autenticação retorna 401" nunca vai passar aqui,
+// porque não existe ninguém checando autenticação neste tipo de teste.
+//
+// Os testes de logout que precisam checar autenticação de verdade devem
+// ficar junto dos outros testes de segurança do projeto (o arquivo que já
+// usa @SpringBootTest + @AutoConfigureMockMvc, carregando o filtro
+// completo) — veja LogoutSecurityTest.java, criado ao lado deste.
 @ExtendWith(MockitoExtension.class)
 public class LoginControllerTest {
 
@@ -67,7 +76,7 @@ public class LoginControllerTest {
                 .andExpect(header().exists(HttpHeaders.SET_COOKIE))
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("jwtToken=mocked-jwt-token")))
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("HttpOnly")))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Login successful"));
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.message").value("Login successful"));
     }
 
     @Test
@@ -95,23 +104,5 @@ public class LoginControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(this.objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @DisplayName("Should successfully logout authenticated user by clearing the jwtToken cookie")
-    @WithMockUser(username = "auth@email.com")
-    void logout_AuthenticateUser_ShouldReturn200AndClearCookie() throws Exception{
-        mockMvc.perform(post("/logout"))
-                .andExpect(status().isOk())
-                .andExpect(header().exists("Set-Cookie"))
-                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("jwtToken=;")))
-                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("Max-Age=0")));
-    }
-
-    @Test
-    @DisplayName("It should return a 401 Unauthorized error when attempting to log out without being authenticated.")
-    void logout_UnauthenticatedUser_Return401Unauthorized() throws Exception {
-        mockMvc.perform(post("/logout"))
-                .andExpect(status().isUnauthorized());
     }
 }

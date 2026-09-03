@@ -59,6 +59,7 @@ public class SecurityConfig {
                                         ).permitAll()
                                         .anyRequest().authenticated()
                         )
+                        .logout(logout -> logout.disable())
                         .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                         .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                         .build();

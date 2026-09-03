@@ -22,6 +22,22 @@ public class LoginController {
     @Value("${app.cookie.secure:false}")
     private boolean isSecureCookie;
 
+    // NOVO: sameSite agora vem de variável de ambiente, com "Lax" como
+    // padrão seguro para desenvolvimento local. Antes estava fixo em
+    // "None" no código — e "None" só funciona se o cookie também for
+    // Secure, que por sua vez só funciona em conexão HTTPS. Rodando
+    // local em http://localhost, isso fazia o navegador descartar o
+    // cookie silenciosamente: o login retornava 200, mas a sessão nunca
+    // "colava" de verdade.
+    //
+    // Em produção (Render + front em outro domínio), configure
+    // APP_COOKIE_SAMESITE=None nas variáveis de ambiente do Render,
+    // junto com APP_COOKIE_SECURE=true (esse já deve estar configurado).
+    // Localmente, não precisa configurar nada — o padrão "Lax" já
+    // funciona certo com APP_COOKIE_SECURE=false.
+    @Value("${app.cookie.samesite:Lax}")
+    private String cookieSameSite;
+
     public LoginController(LoginService loginService) {
         this.loginService = loginService;
     }
@@ -34,7 +50,8 @@ public class LoginController {
                 .httpOnly(true)
                 .secure(isSecureCookie)
                 .maxAge(Duration.ofHours(2))
-                .sameSite("None")
+                .sameSite(cookieSameSite)
+                .path("/")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
@@ -44,14 +61,18 @@ public class LoginController {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletResponse response){
-        ResponseCookie cookei = ResponseCookie.from("jwtToken", "")
+        // IMPORTANTE: o cookie de logout precisa ter EXATAMENTE os mesmos
+        // atributos (secure, sameSite, path) do cookie de login, senão o
+        // navegador entende como um cookie diferente e não apaga o de
+        // verdade.
+        ResponseCookie cookie = ResponseCookie.from("jwtToken", "")
                 .httpOnly(true)
                 .secure(isSecureCookie)
                 .path("/")
                 .maxAge(0)
-                .sameSite("None")
+                .sameSite(cookieSameSite)
                 .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, cookei.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return ResponseEntity.ok().build();
     }
 }

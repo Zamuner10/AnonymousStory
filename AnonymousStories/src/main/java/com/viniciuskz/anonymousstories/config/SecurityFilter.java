@@ -34,20 +34,19 @@ import java.io.IOException;
         ) throws ServletException, IOException {
 
             var token = this.recoverToken(request);
+        if (token != null) {
+            var email = tokenService.validateToken(token);
 
-            if(token !=null){
-                var email = tokenService.validateToken(token);
+        // Proteção contra NullPointerException
+        if (email != null && !email.isBlank()) { 
+        var user = userRepository.findByEmail(email).orElse(null);
 
-                if(!email.isEmpty()){
-                    var user = userRepository.findByEmail(email).orElse(null);
-
-                    if(user != null){
-                        var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                    }
-                }
-            }
-
+        if (user != null) {
+            var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+    }
+}
             filterChain.doFilter(request, response);
         }
 
