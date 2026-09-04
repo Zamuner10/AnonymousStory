@@ -247,7 +247,7 @@ export function Register() {
                 <button 
                   type="button" 
                   onClick={() => navigate("/login")} 
-                  className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[20px] text-[#b07030] hover:text-[#1a1208] active:text-[#1a1208] underline p-0 transition-colors touch-manipulation"
+                  className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[20px] text-[#b07030] hover:text-[#4169E1] active:text-[#4169E1] underline p-0 transition-colors touch-manipulation"
                 >
                   entrar
                 </button>

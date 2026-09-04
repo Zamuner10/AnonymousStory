@@ -202,6 +202,7 @@ export function Home() {
           um amor, uma conquista ou uma perda. Sinta-se à vontade para deixar a
           sua marca.
         </p>
+
         <div className="flex items-center gap-[14px]">
           {/* Botão 1: Escrever uma carta */}
           <div className="relative w-[194px] h-[50px] group transition-transform duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 hover:scale-[1.02]">
@@ -289,6 +290,13 @@ export function Home() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Assinatura discreta do criador no canto inferior direito */}
+      <div className="absolute bottom-4 right-6 pointer-events-none z-10 select-none">
+        <span className="font-['Caveat'] text-lg text-[#1a1208]/35 tracking-widest font-medium">
+          created by kz
+        </span>
       </div>
     </div>
   );
