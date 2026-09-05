@@ -1,8 +1,11 @@
 package com.viniciuskz.anonymousstories.controller;
 
 
+import com.viniciuskz.anonymousstories.dto.ForgotPasswordRequestDTO;
+import com.viniciuskz.anonymousstories.dto.ResetPasswordRequestDTO;
 import com.viniciuskz.anonymousstories.dto.UserRequestDTO;
 import com.viniciuskz.anonymousstories.dto.UserResponseDTO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import com.viniciuskz.anonymousstories.service.UserService;
 
 import jakarta.validation.Valid;
 
+import java.util.Map;
 
 
 @RestController
@@ -25,6 +29,20 @@ UserController {
 
 
     private final UserService userService;
+
+    // CORRIGIDO: antes o link "Ir para o Login" apontava pra
+    // "http://localhost:8080/login" — esse é o endereço do BACKEND, que
+    // nem tem essa rota (a tela de login é do React, em outro endereço
+    // totalmente diferente). Agora vem de variável de ambiente, igual o
+    // resto dos endereços do projeto (DB_URL, JWT_SECRET etc.).
+    //
+    // Adicione esta linha no application.properties:
+    // app.frontend-url=${APP_FRONTEND_URL:http://localhost:5173}
+    //
+    // E, quando fizer o deploy do front (Vercel/Netlify), configure
+    // APP_FRONTEND_URL no painel do Render com a URL real de produção.
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
 
     public UserController(UserService userService){
         this.userService = userService;
@@ -48,29 +66,96 @@ UserController {
     public ResponseEntity<String> verifyAccount(@RequestParam("token") String token){
         boolean isVerified = userService.verifyUser(token);
         if (isVerified) {
-            String loginPageUrl = "http://localhost:8080/login"; // Altere quando tiver a tela de login no front
+            String loginPageUrl = frontendUrl + "/login";
 
+            // Redesenhado para seguir o mesmo padrão visual do site
+            // (papel #f7f3eb, tinta #1a1208, destaque #b07030, fonte
+            // Caveat) — antes era um card branco/azul genérico, sem
+            // nenhuma relação visual com "Histórias Anônimas".
             String successHtml = """
                 <!DOCTYPE html>
                 <html lang="pt-BR">
                 <head>
                   <meta charset="UTF-8">
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>Conta Ativada - Anonymous Stories</title>
-                  <script src="https://cdn.tailwindcss.com"></script>
+                  <title>Conta Ativada - Histórias Anônimas</title>
+                  <link rel="preconnect" href="https://fonts.googleapis.com">
+                  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+                  <style>
+                    body {
+                      margin: 0;
+                      min-height: 100vh;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      background-color: #f7f3eb;
+                      font-family: 'Caveat', cursive;
+                      padding: 16px;
+                      box-sizing: border-box;
+                    }
+                    .card {
+                      max-width: 440px;
+                      width: 100%%;
+                      background: rgba(255,254,248,0.96);
+                      border: 2.5px solid #1a1208;
+                      border-radius: 10px;
+                      padding: 40px 32px;
+                      text-align: center;
+                      box-shadow: 3px 5px 14px rgba(26,18,8,0.15);
+                    }
+                    .brand {
+                      font-size: 22px;
+                      font-weight: 700;
+                      color: #1a1208;
+                      margin-bottom: 18px;
+                    }
+                    .brand span { color: #b07030; }
+                    .check {
+                      width: 56px;
+                      height: 56px;
+                      margin: 0 auto 16px;
+                      border: 2.5px solid #1a1208;
+                      border-radius: 50%%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 28px;
+                      color: #1a1208;
+                    }
+                    h1 {
+                      font-size: 32px;
+                      font-weight: 700;
+                      color: #1a1208;
+                      margin: 0 0 8px;
+                    }
+                    p {
+                      font-size: 19px;
+                      color: #5a4020;
+                      line-height: 1.5;
+                      margin: 0 0 28px;
+                    }
+                    a.button {
+                      display: inline-block;
+                      width: 100%%;
+                      box-sizing: border-box;
+                      padding: 12px 20px;
+                      background-color: #1a1208;
+                      color: #f7f3eb;
+                      text-decoration: none;
+                      border-radius: 4px;
+                      font-family: 'Caveat', cursive;
+                      font-size: 20px;
+                      font-weight: 700;
+                    }
+                  </style>
                 </head>
-                <body class="bg-slate-100 min-h-screen flex items-center justify-center p-4 antialiased">
-                  <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center border border-slate-100">
-                    <div class="mx-auto w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mb-6 shadow-inner">
-                      ✓
-                    </div>
-                    <h1 class="text-2xl font-bold text-slate-800 tracking-tight mb-2">Conta Ativada com Sucesso!</h1>
-                    <p class="text-slate-600 text-sm leading-relaxed mb-8">
-                      Sua conta foi verificada. Você já pode acessar a plataforma para publicar e ler histórias de forma totalmente anônima.
-                    </p>
-                    <a href="%s" class="inline-block w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-lg shadow-blue-500/30 transition-all duration-200 active:scale-95">
-                      Ir para o Login
-                    </a>
+                <body>
+                  <div class="card">
+                    <div class="brand">Histórias <span>Anônimas</span></div>
+                    <div class="check">✓</div>
+                    <h1>Conta ativada com sucesso!</h1>
+                    <p>Sua conta foi verificada. Você já pode entrar e começar a ler e escrever histórias, de forma totalmente anônima.</p>
+                    <a href="%s" class="button">Ir para o login</a>
                   </div>
                 </body>
                 </html>
@@ -85,23 +170,89 @@ UserController {
             <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Erro na Ativação - Anonymous Stories</title>
-              <script src="https://cdn.tailwindcss.com"></script>
+              <title>Erro na Ativação - Histórias Anônimas</title>
+              <link rel="preconnect" href="https://fonts.googleapis.com">
+              <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+              <style>
+                body {
+                  margin: 0;
+                  min-height: 100vh;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  background-color: #f7f3eb;
+                  font-family: 'Caveat', cursive;
+                  padding: 16px;
+                  box-sizing: border-box;
+                }
+                .card {
+                  max-width: 440px;
+                  width: 100%%;
+                  background: rgba(255,254,248,0.96);
+                  border: 2.5px solid #1a1208;
+                  border-radius: 10px;
+                  padding: 40px 32px;
+                  text-align: center;
+                  box-shadow: 3px 5px 14px rgba(26,18,8,0.15);
+                }
+                .brand {
+                  font-size: 22px;
+                  font-weight: 700;
+                  color: #1a1208;
+                  margin-bottom: 18px;
+                }
+                .brand span { color: #b07030; }
+                .cross {
+                  width: 56px;
+                  height: 56px;
+                  margin: 0 auto 16px;
+                  border: 2.5px solid #c0392b;
+                  border-radius: 50%%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  font-size: 26px;
+                  color: #c0392b;
+                }
+                h1 {
+                  font-size: 30px;
+                  font-weight: 700;
+                  color: #1a1208;
+                  margin: 0 0 8px;
+                }
+                p {
+                  font-size: 19px;
+                  color: #5a4020;
+                  line-height: 1.5;
+                  margin: 0;
+                }
+              </style>
             </head>
-            <body class="bg-slate-100 min-h-screen flex items-center justify-center p-4 antialiased">
-              <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center border border-slate-100">
-                <div class="mx-auto w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-3xl mb-6 shadow-inner">
-                  ✕
-                </div>
-                <h1 class="text-2xl font-bold text-slate-800 tracking-tight mb-2">Link Inválido ou Expirado</h1>
-                <p class="text-slate-600 text-sm leading-relaxed mb-8">
-                  Não foi possível ativar sua conta. O link de confirmação pode ter expirado ou já ter sido utilizado.
-                </p>
+            <body>
+              <div class="card">
+                <div class="brand">Histórias <span>Anônimas</span></div>
+                <div class="cross">✕</div>
+                <h1>Link inválido ou expirado</h1>
+                <p>Não foi possível ativar sua conta. O link de confirmação pode ter expirado ou já ter sido usado.</p>
               </div>
             </body>
             </html>
             """;
 
         return ResponseEntity.badRequest().body(errorHtml);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO dto){
+        userService.processForgotPassword(dto);
+        return ResponseEntity.ok(Map.of( "message", "If this email address is registered on our platform, you will receive a password reset link."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword (@Valid @RequestBody ResetPasswordRequestDTO dto){
+        userService.resetPassword(dto);
+        return ResponseEntity.ok(Map.of(
+                "message", "Password changed successfully! You can now log in with your new password."
+        ));
     }
 }

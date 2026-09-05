@@ -1,187 +1,356 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // 1. Importação do hook
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Background from "../components/Background";
-import { SketchInput, SketchButton, Label, SketchDivider } from "../components/SketchUI";
 import { api } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 
+const MAX_CONTENT = 500;
+const MIN_CONTENT = 30;
+const MAX_TITLE = 80;
+const MIN_TITLE = 5;
+
 export function CreateStory() {
-  const navigate = useNavigate(); // 2. Hook de navegação do React Router
+  const navigate = useNavigate();
   const { user } = useAuth();
 
+  const [anonymous, setAnonymous] = useState(true);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [anonymous, setAnonymous] = useState(true);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [sent, setSent] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const displayName = anonymous ? "Anônimo(a)" : user?.name || "Anônimo(a)";
+  const remaining = MAX_CONTENT - content.length;
+  const progressPct = Math.max(0, Math.min(100, (content.length / MAX_CONTENT) * 100));
+
+  const today = new Date().toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  function handleClear() {
+    setTitle("");
+    setContent("");
     setError("");
-    setSuccessMessage("");
+  }
 
-    // Validações locais antes de disparar a requisição
-    if (title.length < 5 || title.length > 80) {
-      setError("O título deve ter entre 5 e 80 caracteres.");
+  async function handleSubmit() {
+    setError("");
+
+    if (title.trim().length < MIN_TITLE || title.trim().length > MAX_TITLE) {
+      setError(`O assunto precisa ter entre ${MIN_TITLE} e ${MAX_TITLE} caracteres.`);
       return;
     }
-
-    if (content.length < 30 || content.length > 500) {
-      setError("O conteúdo deve ter entre 30 e 500 caracteres.");
+    if (content.trim().length < MIN_CONTENT || content.trim().length > MAX_CONTENT) {
+      setError(`A carta precisa ter entre ${MIN_CONTENT} e ${MAX_CONTENT} caracteres.`);
       return;
     }
 
     setLoading(true);
-
     try {
-      await api.post("/stories", {
-        title,
-        content,
-        anonymous,
-      });
-
-      setSuccessMessage("Carta enviada para o mural com sucesso!");
-
-      // 3. Redireciona para a rota real '/feed' após 1.5s
-      setTimeout(() => {
-        navigate("/feed");
-      }, 1500);
+      await api.post("/stories", { title, content, anonymous });
+      setSent(true);
+      setTimeout(() => navigate("/feed"), 1600);
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "Erro ao publicar a carta. Tente novamente.");
+        setError(err.response?.data?.message || "Não foi possível enviar a carta. Tente novamente.");
       } else {
         setError("Ocorreu um erro inesperado ao conectar ao servidor.");
       }
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="relative w-full min-h-screen py-10 flex items-center justify-center bg-[#f7f3eb]">
-      <Background fadeStrength="heavy" />
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#f7f3eb",
+        overflow: "hidden",
+        padding: "24px 16px",
+        boxSizing: "border-box",
+      }}
+    >
+      {/* Fundo pautado quadriculado — mesmo padrão do resto do site */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "linear-gradient(rgba(80,100,180,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(80,100,180,0.05) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+          pointerEvents: "none",
+        }}
+      />
 
-      <div className="relative z-10 w-full max-w-xl px-4 flex flex-col items-center">
-        {/* Logotipo da Aplicação */}
-        <button
-          onClick={() => navigate("/")}
-          className="bg-transparent border-none cursor-pointer mb-6"
+      {/* Logotipo */}
+      <button
+        onClick={() => navigate("/")}
+        style={{
+          position: "relative",
+          zIndex: 10,
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          marginBottom: 18,
+        }}
+      >
+        <span style={{ fontFamily: "Caveat, cursive", fontSize: 26, fontWeight: 700, color: "#1a1208" }}>
+          Histórias <span style={{ color: "#b07030" }}>Anônimas</span>
+        </span>
+      </button>
+
+      {/* A carta — mesmo molde visual do modal de leitura (LetterModal),
+          mas SEM a margem vermelha, e agora editável em vez de só
+          exibir texto. */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          width: 560,
+          maxWidth: "94vw",
+          maxHeight: "80vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <svg
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible", pointerEvents: "none" }}
         >
-          <span className="font-[#1a1208] font-['Caveat'] text-3xl font-bold tracking-tight">
-            Histórias <span className="text-[#b07030]">Anônimas</span>
-          </span>
-        </button>
+          <defs>
+            <filter id="write-sk">
+              <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="4" seed="41" result="n" />
+              <feDisplacementMap in="SourceGraphic" in2="n" scale="4" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+          </defs>
+          <rect
+            x="5"
+            y="5"
+            width="calc(100% - 10px)"
+            height="calc(100% - 10px)"
+            rx="5"
+            fill="rgba(255,254,245,0.97)"
+            stroke="#1a1208"
+            strokeWidth="2.8"
+            filter="url(#write-sk)"
+          />
+        </svg>
 
-        {/* Card de Folha Pautada */}
-        <div className="relative w-full bg-[#fffdfc]/95 border-2 border-[#1a1208] rounded-lg p-8 shadow-md">
-          {/* Margem Vermelha de Caderno */}
-          <div className="absolute top-0 bottom-0 left-12 w-[1px] bg-[rgba(220,80,60,0.2)] pointer-events-none" />
+        {/* Linhas pautadas*/}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "repeating-linear-gradient(transparent, transparent 27px, rgba(100,120,200,0.09) 27px, rgba(100,120,200,0.09) 28px)",
+            backgroundPositionY: "90px",
+            borderRadius: 4,
+            pointerEvents: "none",
+          }}
+        />
 
-          <h2 className="font-['Caveat'] text-4xl font-bold text-[#1a1208] text-center mb-1">
-            Escrever uma Carta
-          </h2>
-          <p className="font-['Caveat'] text-lg text-[#7a5a2a] text-center mb-4">
-            Deixe suas palavras voarem sem julgamentos
-          </p>
-
-          <SketchDivider seed={33} />
-
-          {/* Mensagens de Feedback */}
-          {successMessage && (
-            <div className="my-3 p-3 bg-green-100 border border-green-400 text-green-800 rounded font-['Caveat'] text-xl text-center">
-              {successMessage}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 1,
+            padding: "32px 36px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 4,
+            overflowY: "auto",
+          }}
+        >
+          {sent ? (
+            <div style={{ textAlign: "center", padding: "60px 0" }}>
+              <p style={{ fontFamily: "Caveat, cursive", fontSize: 30, fontWeight: 700, color: "#1a1208", marginBottom: 8 }}>
+                Carta enviada ✦
+              </p>
+              <p style={{ fontFamily: "Caveat, cursive", fontSize: 18, color: "#7a5a2a" }}>
+                Ela já está a caminho do mural...
+              </p>
             </div>
-          )}
-
-          {error && (
-            <div className="my-3 p-3 bg-red-100 border border-red-400 text-red-800 rounded font-['Caveat'] text-xl text-center">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-5">
-            {/* Campo Título */}
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <Label>Título da Carta</Label>
-                <span className="font-['Caveat'] text-sm text-[#7a5a2a]">
-                  {title.length}/80
+          ) : (
+            <>
+              {/* Cabeçalho: De / Data — clique em "De:" alterna entre
+                  Anônimo e o nome da conta, sem precisar de um botão
+                  separado quebrando a estética da carta */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+                <button
+                  type="button"
+                  onClick={() => setAnonymous((a) => !a)}
+                  title="Clique para trocar entre Anônimo e seu nome"
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                    fontFamily: "Caveat, cursive",
+                    fontSize: 16,
+                    color: "#7a5a2a",
+                    textDecoration: "underline dotted",
+                  }}
+                >
+                  De: {displayName}
+                </button>
+                <span style={{ fontFamily: "Caveat, cursive", fontSize: 14, color: "#7a5a2a", opacity: 0.7 }}>
+                  {today}
                 </span>
               </div>
-              <SketchInput
-                placeholder="Ex: Para o amor que não deu certo..."
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                seed={41}
-              />
-            </div>
 
-            {/* Campo Conteúdo */}
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <Label>Sua História</Label>
-                <span className={`font-['Caveat'] text-sm ${content.length < 30 || content.length > 500 ? 'text-red-600 font-bold' : 'text-[#7a5a2a]'}`}>
-                  {content.length}/500 (mín. 30)
+              {/* Assunto — o "título" que o backend exige (5 a 80
+                  caracteres), encaixado discretamente no cabeçalho da
+                  carta, já que o design do Figma não mostra um campo
+                  separado pra isso */}
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14, borderBottom: "1px dashed rgba(26,18,8,0.25)", paddingBottom: 6 }}>
+                <label style={{ fontFamily: "Caveat, cursive", fontSize: 15, color: "#7a5a2a", opacity: 0.75, whiteSpace: "nowrap" }}>
+                  Assunto:
+                </label>
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="do que se trata esta carta..."
+                  maxLength={MAX_TITLE}
+                  style={{
+                    flex: 1,
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    fontFamily: "Caveat, cursive",
+                    fontSize: 20,
+                    color: "#1a1208",
+                  }}
+                />
+                <span style={{ fontFamily: "Caveat, cursive", fontSize: 15, color: "#a08860", whiteSpace: "nowrap" }}>
+                  {title.length}/{MAX_TITLE}
                 </span>
               </div>
+
+              {/* Área de escrita — placeholder igual ao texto guia do
+                  Figma ("Escreva aqui a sua história...") */}
               <textarea
-                rows={6}
-                placeholder="Escreva do fundo do seu coração..."
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="w-full p-3 bg-[#f7f3eb]/80 border-2 border-[#1a1208] rounded font-['Caveat'] text-xl text-[#1a1208] focus:outline-none focus:bg-[#fffdfc] transition-all resize-none"
+                onChange={(e) => setContent(e.target.value.slice(0, MAX_CONTENT))}
+                placeholder={"Escreva aqui a sua história...\n\nSeja ela de um amor, uma conquista ou uma perda.\nEsta carta será lida por alguém, um dia."}
+                style={{
+                  flex: 1,
+                  minHeight: 220,
+                  width: "100%",
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  resize: "none",
+                  fontFamily: "Caveat, cursive",
+                  fontSize: 19,
+                  lineHeight: "27px",
+                  color: "#1a1208",
+                }}
               />
-            </div>
 
-            {/* Seletor de Assinatura */}
-            <div>
-              <Label>Como deseja assinar esta carta?</Label>
-              <div className="grid grid-cols-2 gap-3 mt-2">
+              {/* Contador com barra de progresso — igual ao "500
+                  restantes" do Figma */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6, marginBottom: 4 }}>
+                <div style={{ flex: 1, height: 3, background: "rgba(26,18,8,0.12)", borderRadius: 2, overflow: "hidden" }}>
+                  <div
+                    style={{
+                      width: `${progressPct}%`,
+                      height: "100%",
+                      background: remaining < 0 ? "#c0392b" : "#b07030",
+                      transition: "width 0.15s ease",
+                    }}
+                  />
+                </div>
+                <span style={{ fontFamily: "Caveat, cursive", fontSize: 13, color: remaining < 30 ? "#c0392b" : "#7a5a2a", whiteSpace: "nowrap" }}>
+                  {remaining} restantes
+                </span>
+              </div>
+
+              {/* Assinatura — "com carinho, Anônimo(a)" do Figma, dinâmica
+                  de acordo com a escolha feita no "De:" acima */}
+              <p style={{ fontFamily: "Caveat, cursive", fontSize: 17, color: "#1a1208", fontWeight: 700, textAlign: "right", marginTop: 6, marginBottom: 4 }}>
+                — com carinho, {displayName}
+              </p>
+
+              {error && (
+                <p style={{ fontFamily: "Caveat, cursive", fontSize: 16, color: "#c0392b", textAlign: "center", marginTop: 4 }}>
+                  {error}
+                </p>
+              )}
+
+              {/* Botões — "Apagar" e "Enviar carta ✉", igual ao Figma */}
+              <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
                 <button
                   type="button"
-                  onClick={() => setAnonymous(true)}
-                  className={`py-2 px-3 rounded font-['Caveat'] text-lg font-bold border-2 transition-all cursor-pointer ${
-                    anonymous
-                      ? "bg-[#1a1208] text-[#f7f3eb] border-[#1a1208]"
-                      : "bg-transparent text-[#1a1208] border-[#1a1208]/40 hover:border-[#1a1208]"
-                  }`}
+                  onClick={handleClear}
+                  disabled={loading}
+                  style={{
+                    flex: 1,
+                    padding: "11px 0",
+                    background: "transparent",
+                    border: "2px solid #1a1208",
+                    borderRadius: 6,
+                    cursor: loading ? "default" : "pointer",
+                    fontFamily: "Caveat, cursive",
+                    fontSize: 17,
+                    fontWeight: 700,
+                    color: "#1a1208",
+                    opacity: loading ? 0.5 : 1,
+                  }}
                 >
-                  ✦ Anônimo
+                  Apagar
                 </button>
-
                 <button
                   type="button"
-                  onClick={() => setAnonymous(false)}
-                  className={`py-2 px-3 rounded font-['Caveat'] text-lg font-bold border-2 transition-all cursor-pointer ${
-                    !anonymous
-                      ? "bg-[#1a1208] text-[#f7f3eb] border-[#1a1208]"
-                      : "bg-transparent text-[#1a1208] border-[#1a1208]/40 hover:border-[#1a1208]"
-                  }`}
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  style={{
+                    flex: 1,
+                    padding: "11px 0",
+                    background: "#1a1208",
+                    border: "2px solid #1a1208",
+                    borderRadius: 6,
+                    cursor: loading ? "default" : "pointer",
+                    fontFamily: "Caveat, cursive",
+                    fontSize: 17,
+                    fontWeight: 700,
+                    color: "#f7f3eb",
+                    opacity: loading ? 0.7 : 1,
+                  }}
                 >
-                  ✍ {user?.name ? user.name : "Assinar com meu nome"}
+                  {loading ? "Enviando..." : "Enviar carta ✉"}
                 </button>
               </div>
-            </div>
-
-            <div className="mt-2">
-              <SketchButton seed={50} variant="primary" type="submit">
-                {loading ? "Enviando Carta..." : "Publicar Carta"}
-              </SketchButton>
-            </div>
-          </form>
+            </>
+          )}
         </div>
-
-        {/* Botão de Voltar */}
-        <button
-          type="button"
-          onClick={() => navigate("/feed")}
-          className="mt-6 px-4 py-1.5 bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-lg font-bold text-[#1a1208] flex items-center gap-2 hover:bg-[#1a1208] hover:text-[#f7f3eb] transition-colors shadow-sm"
-        >
-          Voltar para o Mural de Cartas
-        </button>
       </div>
+
+      {/* Voltar — igual ao "← voltar para o início" do Figma */}
+      <button
+        type="button"
+        onClick={() => navigate("/feed")}
+        style={{
+          position: "relative",
+          zIndex: 10,
+          marginTop: 18,
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          fontFamily: "Caveat, cursive",
+          fontSize: 16,
+          color: "#7a5a2a",
+        }}
+      >
+      voltar para o mural
+      </button>
     </div>
   );
 }

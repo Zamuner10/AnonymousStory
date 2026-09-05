@@ -1,11 +1,16 @@
 package com.viniciuskz.anonymousstories.service;
 
+import com.viniciuskz.anonymousstories.dto.ForgotPasswordRequestDTO;
+import com.viniciuskz.anonymousstories.dto.ResetPasswordRequestDTO;
 import com.viniciuskz.anonymousstories.dto.UserRequestDTO;
 import com.viniciuskz.anonymousstories.entity.User;
 import com.viniciuskz.anonymousstories.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,6 +20,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+
+    @Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
@@ -133,5 +141,38 @@ public class UserService {
         if (!hasSpecialChar) {
             throw new IllegalArgumentException("Password must contain at least one special character.");
         }
+    }
+
+    @Transactional
+    public void processForgotPassword(ForgotPasswordRequestDTO dto) {
+        Optional<User> userOptional = userRepository.findByEmail(dto.email());
+
+        if(userOptional.isPresent()){
+            User user = userOptional.get();
+            String token = UUID.randomUUID().toString();
+
+            user.setPasswordResetToken(token);
+            user.setPasswordResetTokenExpiry(LocalDateTime.now().plusMinutes(30));
+
+            String resetLink = frontendUrl + "/reset-password?token=" + token;
+            emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+        }
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequestDTO dto) {
+        User user = userRepository.findByPasswordResetToken(dto.token())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid or non-existent password reset token."));
+
+        if (user.getPasswordResetTokenExpiry() == null || user.getPasswordResetTokenExpiry().isBefore(LocalDateTime.now())){
+            throw  new IllegalArgumentException("The password reset link has expired. Please request a new link");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.newPassword()));
+
+        user.setPasswordResetToken(null);
+        user.setPasswordResetTokenExpiry(null);
+
+        userRepository.save(user);
     }
 }

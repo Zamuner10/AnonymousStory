@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -44,7 +45,11 @@ public class User implements UserDetails
     @Column(name = "is_verified")
     private Boolean isVerified = false;
 
-    public User(Long id, String name, String email, String password, Integer age, String verificationToken, Boolean isVerified) {
+    private String passwordResetToken;
+    private LocalDateTime passwordResetTokenExpiry;
+
+
+    public User(Long id, String name, String email, String password, Integer age, String verificationToken, Boolean isVerified, String passwordResetToken, LocalDateTime passwordResetTokenExpiry) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -52,6 +57,8 @@ public class User implements UserDetails
         this.age = age;
         this.verificationToken = verificationToken;
         this.isVerified = isVerified;
+        this.passwordResetToken = passwordResetToken;
+        this.passwordResetTokenExpiry = passwordResetTokenExpiry;
     }
 
     public User (){}
@@ -94,6 +101,12 @@ public class User implements UserDetails
     public Boolean getIsVerified() {
         return isVerified;
     }
+
+    public void setPasswordResetToken(String passwordResetToken){ this.passwordResetToken = passwordResetToken; }
+    public String getPasswordResetToken () {return passwordResetToken;}
+
+    public void setPasswordResetTokenExpiry(LocalDateTime passwordResetTokenExpiry){this.passwordResetTokenExpiry = passwordResetTokenExpiry;}
+    public LocalDateTime getPasswordResetTokenExpiry() {return passwordResetTokenExpiry;}
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

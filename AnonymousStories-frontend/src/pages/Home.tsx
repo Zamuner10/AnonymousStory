@@ -1,6 +1,8 @@
 // src/pages/Home.tsx
 import { useNavigate } from "react-router-dom";
 import Background from "../components/Background";
+import { Header } from "../components/Header";
+import { useAuth } from "../contexts/AuthContext"; // 1. Importação do hook de autenticação
 
 function Doodles() {
   return (
@@ -147,9 +149,17 @@ function Doodles() {
 
 export function Home() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth(); // 2. Extração do estado de autenticação
 
   return (
     <div className="relative w-full h-screen overflow-hidden flex items-center justify-center bg-[#f7f3eb]">
+      {/* Renderiza o Header APENAS quando o usuário estiver logado */}
+      {isAuthenticated && (
+        <div className="absolute top-4 right-6 z-20">
+          <Header />
+        </div>
+      )}
+
       <Background fadeStrength="medium" />
       <Doodles />
 
@@ -240,7 +250,7 @@ export function Home() {
               />
             </svg>
             <button
-              onClick={() => navigate("/login")}
+              onClick={() => navigate(isAuthenticated ? "/write" : "/login")}
               className="relative z-10 w-full h-full px-8 py-[13px] bg-transparent text-[#f7f3eb] group-hover:text-[#1a1208] font-['Caveat'] font-bold text-[19px] border-none cursor-pointer flex items-center justify-center transition-colors duration-200"
             >
               Escrever uma carta
