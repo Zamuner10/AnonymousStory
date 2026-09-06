@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { api } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
+import { SketchButton } from "../components/SketchUI";
 
 const MAX_CONTENT = 500;
 const MIN_CONTENT = 30;
@@ -145,7 +146,9 @@ export function CreateStory() {
           />
         </svg>
 
-        {/* Linhas pautadas*/}
+        {/* Linhas pautadas — SEM a margem vermelha (removida por pedido,
+            era uma barra vertical na cor "rgba(220,80,60,...)" que
+            existia aqui antes, do lado esquerdo do papel) */}
         <div
           style={{
             position: "absolute",
@@ -206,6 +209,11 @@ export function CreateStory() {
                 </span>
               </div>
 
+              {/* Para: — decorativo (igual ao Figma), não é um campo real */}
+              <p style={{ fontFamily: "Caveat, cursive", fontSize: 16, color: "#7a5a2a", opacity: 0.75, marginBottom: 10 }}>
+                Para: quem vai ler isso?
+              </p>
+
               {/* Assunto — o "título" que o backend exige (5 a 80
                   caracteres), encaixado discretamente no cabeçalho da
                   carta, já que o design do Figma não mostra um campo
@@ -225,11 +233,11 @@ export function CreateStory() {
                     border: "none",
                     outline: "none",
                     fontFamily: "Caveat, cursive",
-                    fontSize: 20,
+                    fontSize: 17,
                     color: "#1a1208",
                   }}
                 />
-                <span style={{ fontFamily: "Caveat, cursive", fontSize: 15, color: "#a08860", whiteSpace: "nowrap" }}>
+                <span style={{ fontFamily: "Caveat, cursive", fontSize: 12, color: "#a08860", whiteSpace: "nowrap" }}>
                   {title.length}/{MAX_TITLE}
                 </span>
               </div>
@@ -285,48 +293,20 @@ export function CreateStory() {
                 </p>
               )}
 
-              {/* Botões — "Apagar" e "Enviar carta ✉", igual ao Figma */}
+              {/* Botões — trocados de borda reta pelo SketchButton
+                  compartilhado (mesma borda "de lápis" do resto do
+                  site, igual ao Home) */}
               <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
-                <button
-                  type="button"
-                  onClick={handleClear}
-                  disabled={loading}
-                  style={{
-                    flex: 1,
-                    padding: "11px 0",
-                    background: "transparent",
-                    border: "2px solid #1a1208",
-                    borderRadius: 6,
-                    cursor: loading ? "default" : "pointer",
-                    fontFamily: "Caveat, cursive",
-                    fontSize: 17,
-                    fontWeight: 700,
-                    color: "#1a1208",
-                    opacity: loading ? 0.5 : 1,
-                  }}
-                >
-                  Apagar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={loading}
-                  style={{
-                    flex: 1,
-                    padding: "11px 0",
-                    background: "#1a1208",
-                    border: "2px solid #1a1208",
-                    borderRadius: 6,
-                    cursor: loading ? "default" : "pointer",
-                    fontFamily: "Caveat, cursive",
-                    fontSize: 17,
-                    fontWeight: 700,
-                    color: "#f7f3eb",
-                    opacity: loading ? 0.7 : 1,
-                  }}
-                >
-                  {loading ? "Enviando..." : "Enviar carta ✉"}
-                </button>
+                <div style={{ flex: 1, opacity: loading ? 0.5 : 1, pointerEvents: loading ? "none" : "auto" }}>
+                  <SketchButton seed={71} variant="ghost" onClick={handleClear}>
+                    Apagar
+                  </SketchButton>
+                </div>
+                <div style={{ flex: 1, opacity: loading ? 0.7 : 1, pointerEvents: loading ? "none" : "auto" }}>
+                  <SketchButton seed={72} variant="primary" onClick={handleSubmit}>
+                    {loading ? "Enviando..." : "Enviar carta ✉"}
+                  </SketchButton>
+                </div>
               </div>
             </>
           )}
@@ -349,7 +329,7 @@ export function CreateStory() {
           color: "#7a5a2a",
         }}
       >
-      voltar para o mural
+        ← voltar para o mural
       </button>
     </div>
   );

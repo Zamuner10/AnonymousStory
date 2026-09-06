@@ -13,7 +13,6 @@ interface Story {
 
 const PAPER_COLORS = ["#fffef5", "#f5f8ff", "#fff5f5", "#f5fff7", "#fdf5ff", "#fffbf0", "#f0f8ff"];
 
-// Função utilitária Fisher-Yates para embaralhar arrays
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -23,7 +22,6 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
-// Card clicável do mural
 function ReadCard({
   story,
   seed,
@@ -77,7 +75,6 @@ function ReadCard({
         <rect x={4} y={4} width={w - 8} height={h - 8} rx={3} fill="none" stroke="#1a1208" strokeWidth="2" filter={`url(#rsk-${seed})`} />
       </svg>
 
-      {/* Conteúdo da Carta */}
       {story ? (
         <div style={{ position: "absolute", inset: "10px 14px 10px 46px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div>
@@ -132,51 +129,49 @@ const ROWS_CONFIG = [
   { dir: "right" as const, dur: 54, so: 6, to: 4 },
 ];
 
+const SLOTS_PER_ROW = 8;
+
 function Row({
-  stories,
+  rowStories,
   direction,
   duration,
   seedOff,
   tiltOff,
-  rowGlobalOffset,
   onCardClick,
 }: {
-  stories: Story[];
+  rowStories: (Story | null)[];
   direction: "left" | "right";
   duration: number;
   seedOff: number;
   tiltOff: number;
-  rowGlobalOffset: number;
   onCardClick: (s: Story) => void;
 }) {
-  const slots = Array.from({ length: 6 });
-  const tripledSlots = [...slots, ...slots, ...slots];
+  const baseBlock = Array.from({ length: SLOTS_PER_ROW }, (_, idx) => 
+    idx < rowStories.length ? rowStories[idx] : null
+  );
+
+  const infiniteLoopSlots = [...baseBlock, ...baseBlock];
 
   return (
-    <div style={{ overflow: "visible", width: "100%", flexShrink: 0 }}>
+    <div style={{ overflow: "hidden", width: "100%", flexShrink: 0 }}>
       <div
         className={direction === "left" ? "animate-marquee-slow-left" : "animate-marquee-slow-right"}
         style={{ display: "flex", gap: 18, width: "max-content", alignItems: "center", paddingBlock: 10, animationDuration: `${duration}s` }}
       >
-        {tripledSlots.map((_, i) => {
-          const globalIndex = rowGlobalOffset + i;
-          const storyData = globalIndex < stories.length ? stories[globalIndex] : null;
-          return (
-            <ReadCard
-              key={i}
-              story={storyData}
-              seed={(i + seedOff) % 17 + 1}
-              tilt={TILTS[(i + tiltOff) % TILTS.length]}
-              onClick={() => storyData && onCardClick(storyData)}
-            />
-          );
-        })}
+        {infiniteLoopSlots.map((storyData, i) => (
+          <ReadCard
+            key={i}
+            story={storyData}
+            seed={(i + seedOff) % 17 + 1}
+            tilt={TILTS[(i + tiltOff) % TILTS.length]}
+            onClick={() => storyData && onCardClick(storyData)}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
-// Modal completo de leitura da carta
 function LetterModal({ story, onClose }: { story: Story; onClose: () => void }) {
   return (
     <div
@@ -196,7 +191,6 @@ function LetterModal({ story, onClose }: { story: Story; onClose: () => void }) 
     >
       <style>{`@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } } @keyframes slideUp { from { transform: translateY(24px) scale(0.97); opacity: 0 } to { transform: translateY(0) scale(1); opacity: 1 } }`}</style>
 
-      {/* Papel */}
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -304,34 +298,53 @@ function LetterModal({ story, onClose }: { story: Story; onClose: () => void }) 
 
 export function ReadLetters() {
   const navigate = useNavigate();
-  const [displayStories, setDisplayStories] = useState<Story[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  const [displayStories, setDisplayStories] = useState<Story[]>(() => {
+    try {
+      const cached = localStorage.getItem("anonymous_stories_cache");
+      return cached ? JSON.parse(cached) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [loading, setLoading] = useState(() => displayStories.length === 0);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Story | null>(null);
 
   const handleIncomingStories = (incoming: Story[]) => {
     setDisplayStories((prev) => {
+      let updatedList: Story[];
+
       if (prev.length === 0) {
         const fixedStory1 = incoming.find((s) => s.id === 1);
         const remaining = incoming.filter((s) => s.id !== 1);
         const shuffledRemaining = shuffleArray(remaining);
 
-        return fixedStory1 ? [fixedStory1, ...shuffledRemaining] : shuffledRemaining;
+        updatedList = fixedStory1 ? [fixedStory1, ...shuffledRemaining] : shuffledRemaining;
+      } else {
+        const existingIds = new Set(prev.map((s) => s.id));
+        const newStories = incoming.filter((s) => !existingIds.has(s.id));
+
+        if (newStories.length === 0) {
+          return prev;
+        }
+
+        updatedList = [...prev, ...newStories];
       }
 
-      const existingIds = new Set(prev.map((s) => s.id));
-      const newStories = incoming.filter((s) => !existingIds.has(s.id));
-
-      if (newStories.length === 0) {
-        return prev;
+      try {
+        localStorage.setItem("anonymous_stories_cache", JSON.stringify(updatedList));
+      } catch (err) {
+        console.error("Erro ao salvar cache local:", err);
       }
 
-      return [...prev, ...newStories];
+      return updatedList;
     });
   };
 
   useEffect(() => {
-    let isFirstLoad = true;
+    let isFirstLoad = displayStories.length === 0;
 
     async function fetchStories() {
       try {
@@ -356,6 +369,14 @@ export function ReadLetters() {
 
     return () => clearInterval(intervalId);
   }, []);
+
+  const numRows = 5;
+  const rowsStories: (Story | null)[][] = Array.from({ length: numRows }, () => []);
+
+  displayStories.forEach((story, index) => {
+    const rowIndex = index % numRows;
+    rowsStories[rowIndex].push(story);
+  });
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100vh", overflow: "hidden", background: "#f7f3eb" }}>
@@ -382,44 +403,80 @@ export function ReadLetters() {
         }
       `}</style>
 
-      {/* Topo Limpo: Logo Original à esquerda + Header à direita */}
+      {/* Barra Superior Completa */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 30, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 28px", background: "linear-gradient(to bottom, rgba(247,243,235,0.96) 0%, transparent 100%)" }}>
-        <button onClick={() => navigate("/")} style={{ background: "none", border: "none", cursor: "pointer" }}>
-          <span style={{ fontFamily: "Caveat, cursive", fontSize: 24, fontWeight: 700, color: "#1a1208" }}>
-            Histórias <span style={{ color: "#b07030" }}>Anônimas</span>
-          </span>
-        </button>
+        {/* Logo "Histórias Anônimas" à esquerda — AGORA É SÓ TEXTO, NÃO É
+            MAIS UM LINK/BOTÃO CLICÁVEL, conforme pedido. */}
+        <span style={{ fontFamily: "Caveat, cursive", fontSize: 24, fontWeight: 700, color: "#1a1208" }}>
+          Histórias <span style={{ color: "#b07030" }}>Anônimas</span>
+        </span>
 
-        <Header />
+        {/* Lado Direito: Botão Escrever Carta + Header (Usuário/Logout) */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div style={{ position: "relative" }}>
+            <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible", pointerEvents: "none" }}>
+              <defs>
+                <filter id="tb-sk">
+                  <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="3" seed="7" result="n" />
+                  <feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G" />
+                </filter>
+              </defs>
+              <rect
+                x="2"
+                y="2"
+                width="calc(100% - 4px)"
+                height="calc(100% - 4px)"
+                rx="4"
+                fill="#1a1208"
+                filter="url(#tb-sk)"
+                style={{ width: "calc(100% - 4px)", height: "calc(100% - 4px)" }}
+              />
+            </svg>
+            <button
+              onClick={() => navigate("/write")}
+              style={{
+                position: "relative",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "Caveat, cursive",
+                fontSize: 16,
+                fontWeight: 700,
+                color: "#f7f3eb",
+                padding: "7px 18px",
+              }}
+            >
+              Escrever uma carta ✉
+            </button>
+          </div>
+
+          <Header />
+        </div>
       </div>
 
-      {/* Fundo pautado quadriculado */}
       <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(80,100,180,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(80,100,180,0.05) 1px, transparent 1px)", backgroundSize: "28px 28px", pointerEvents: "none" }} />
 
-      {/* 5 fileiras de esteiras com recuo para não encostar na barra superior */}
+      {/* Esteiras Infinitas */}
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "space-evenly", paddingBlock: 6, paddingTop: 56 }}>
         {ROWS_CONFIG.map((row, i) => (
           <Row
             key={i}
-            stories={displayStories}
+            rowStories={rowsStories[i]}
             direction={row.dir}
             duration={row.dur}
             seedOff={row.so}
             tiltOff={row.to}
-            rowGlobalOffset={i * 18}
             onCardClick={setSelected}
           />
         ))}
       </div>
 
-      {/* Barra inferior de status */}
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 20, height: 48, background: "linear-gradient(to top, rgba(247,243,235,0.96) 0%, transparent 100%)", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 10, pointerEvents: "none" }}>
         <span style={{ fontFamily: "Caveat, cursive", fontSize: 13.5, color: "#7a5a2a", opacity: 0.55 }}>
           {error ? error : loading ? "carregando histórias..." : `${displayStories.length} histórias anônimas neste lugar ✦ clique em uma carta para ler`}
         </span>
       </div>
 
-      {/* Modal de leitura da carta */}
       {selected && <LetterModal story={selected} onClose={() => setSelected(null)} />}
     </div>
   );

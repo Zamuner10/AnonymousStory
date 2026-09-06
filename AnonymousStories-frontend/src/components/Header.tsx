@@ -1,14 +1,26 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { SketchButton } from "./SketchUI";
 
-// Cabeçalho compartilhado — a peça que faltava desde que o AuthContext
-// foi criado. Ele existe e funciona (checa se está logado, guarda o
-// nome, tem uma função logout() pronta), mas até agora nenhuma tela
-// realmente usava isso: não tinha botão de "Entrar" nem de "Sair" em
-// lugar nenhum visível. Este componente resolve isso de um jeito só, e
-// pode ser reaproveitado em qualquer página (Home, ReadLetters, etc.)
-// sem duplicar a lógica.
+// CORRIGIDO: este componente tinha "position: absolute" próprio, pensado
+// pra ser jogado solto em qualquer canto da tela. Isso funcionava OK no
+// Home.tsx (que já envolve o Header numa div própria também absoluta),
+// mas quebrava no ReadLetters.tsx — lá o Header fica dentro de uma barra
+// que já existe (display: flex), e o posicionamento absoluto interno
+// fazia ele "fugir" pro canto da página, ignorando que devia ficar do
+// lado do botão "Escrever uma carta".
+//
+// Agora o Header é só um pedacinho de conteúdo comum (flex, sem se
+// autoposicionar) — cada página decide onde ele entra:
+// - Home.tsx: continua funcionando, já que lá o Header é envolvido por
+//   uma div própria com "absolute top-4 right-6".
+// - ReadLetters.tsx: agora pode ficar DENTRO do mesmo "display: flex"
+//   que já tem o botão "Escrever uma carta", lado a lado de verdade.
+//
+// Os botões (Sair/Entrar) agora usam o SketchButton compartilhado, que
+// já tem a borda "de lápis" (traço desenhado via SVG) — igual ao resto
+// do site — em vez da borda reta simples de antes.
 export function Header() {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout, loading } = useAuth();
@@ -18,72 +30,29 @@ export function Header() {
     navigate("/");
   }
 
-  // Enquanto o AuthContext ainda está checando se existe sessão válida
-  // (GET /users/me ao carregar a página), não mostra nada — evita um
-  // "pisca" de Entrar -> Sair assim que a página abre.
   if (loading) {
     return <div style={{ height: 32 }} />;
   }
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        top: 14,
-        right: 24,
-        zIndex: 30,
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-      }}
-    >
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
       {isAuthenticated ? (
         <>
-          <span
-            style={{
-              fontFamily: "Caveat, cursive",
-              fontSize: 16,
-              color: "#7a5a2a",
-            }}
-          >
+          <span style={{ fontFamily: "Caveat, cursive", fontSize: 16, color: "#7a5a2a", whiteSpace: "nowrap" }}>
             Olá, {user?.name}
           </span>
-          <button
-            type="button"
-            onClick={handleLogout}
-            style={{
-              background: "transparent",
-              border: "2px solid #1a1208",
-              borderRadius: 6,
-              padding: "6px 14px",
-              cursor: "pointer",
-              fontFamily: "Caveat, cursive",
-              fontSize: 16,
-              fontWeight: 700,
-              color: "#1a1208",
-            }}
-          >
-            Sair
-          </button>
+          <div style={{ width: 90 }}>
+            <SketchButton seed={91} variant="ghost" onClick={handleLogout}>
+              Sair
+            </SketchButton>
+          </div>
         </>
       ) : (
-        <button
-          type="button"
-          onClick={() => navigate("/login")}
-          style={{
-            background: "#1a1208",
-            border: "2px solid #1a1208",
-            borderRadius: 6,
-            padding: "6px 16px",
-            cursor: "pointer",
-            fontFamily: "Caveat, cursive",
-            fontSize: 16,
-            fontWeight: 700,
-            color: "#f7f3eb",
-          }}
-        >
-          Entrar
-        </button>
+        <div style={{ width: 100 }}>
+          <SketchButton seed={92} variant="primary" onClick={() => navigate("/login")}>
+            Entrar
+          </SketchButton>
+        </div>
       )}
     </div>
   );

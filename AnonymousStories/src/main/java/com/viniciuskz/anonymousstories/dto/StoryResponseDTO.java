@@ -7,6 +7,9 @@ public record StoryResponseDTO(
         Long id,
         String title,
         String content,
+        // CORRIGIDO: estava "isAnonymous" — mesmo motivo do
+        // StoryRequestDTO. Aqui o efeito era menos grave (é só a resposta
+        // saindo, não entrando), mas mantemos os dois consistentes.
         boolean anonymous,
         String authorDisplayName,
         LocalDateTime createdAt

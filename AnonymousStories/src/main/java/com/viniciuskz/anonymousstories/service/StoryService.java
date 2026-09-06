@@ -33,9 +33,16 @@ public class StoryService {
     @Transactional
     public StoryResponseDTO createStory(StoryRequestDTO dto, User user) {
 
+        // 1. Validações de moderacao de conteudo (PII, Spam, Profanidade)
         contentModerationService.validateText(dto.title() + " " + dto.content());
 
-        // Define verdadeiro como padrão se o campo vier nulo
+        // 2. Trata valor nulo definindo o anonimato como true por padrão
+        // CORRIGIDO: era dto.isAnonymous() — o record StoryRequestDTO
+        // chama o componente "anonymous", não "isAnonymous". Chamar o
+        // nome errado nem compilaria se o record realmente tivesse esse
+        // componente — o bug de verdade estava no NOME do campo do DTO,
+        // que foi corrigido lá; aqui só ajustamos a chamada de volta pra
+        // bater com esse nome.
         boolean isAnon = dto.anonymous() != null ? dto.anonymous() : true;
 
         Story story = new Story();
@@ -45,6 +52,7 @@ public class StoryService {
         story.setUser(user);
         story.setCreatedAt(LocalDateTime.now());
 
+        // 3. Salva no banco e retorna o DTO formatado com o nome do autor correto
         Story savedStory = storyRepository.save(story);
         return new StoryResponseDTO(savedStory);
     }

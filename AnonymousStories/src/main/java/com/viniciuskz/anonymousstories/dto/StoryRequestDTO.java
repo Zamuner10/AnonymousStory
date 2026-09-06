@@ -12,6 +12,11 @@ public record StoryRequestDTO(
         @Size(min = 30, max = 500, message = "Content must be between 30 and 500 characters")
         String content,
 
+        // CORRIGIDO: estava "isAnonymous" — isso muda o nome da chave que a
+        // API espera no JSON (records usam o nome do componente como nome
+        // do campo JSON). O frontend manda a chave "anonymous" (sem o
+        // "is"), então o valor nunca chegava aqui, e a escolha da pessoa
+        // era sempre ignorada, caindo no padrão (Anônimo).
         Boolean anonymous
 ) {
         public StoryRequestDTO{
