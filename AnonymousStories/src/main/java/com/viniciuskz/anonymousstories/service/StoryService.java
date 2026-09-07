@@ -83,7 +83,7 @@ public class StoryService {
     @Transactional
     public StoryResponseDTO updateStory(Long id, StoryRequestDTO dto, User currentUser) {
         Story story = storyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Story not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("História não encontrada com o ID:" + id));
 
         if (!story.getUser().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("Você não tem permissão para editar esta história.");
@@ -104,7 +104,7 @@ public class StoryService {
     @Transactional
     public void deleteStory(Long id, User currentUser) {
         Story story = storyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Story not found for deletion with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("História não encontrada para exclusão com ID: " + id));
 
         if (!story.getUser().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("Você não tem permissão para deletar esta história.");

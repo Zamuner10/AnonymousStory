@@ -459,7 +459,7 @@ export function ReadLetters() {
       {/* Esteiras Infinitas */}
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "space-evenly", paddingBlock: 6, paddingTop: 56 }}>
         {ROWS_CONFIG.map((row, i) => (
-          <Row
+          <Row  
             key={i}
             rowStories={rowsStories[i]}
             direction={row.dir}

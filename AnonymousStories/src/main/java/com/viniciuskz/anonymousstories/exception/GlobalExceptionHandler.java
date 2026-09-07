@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<RestErrorMessage> handleBadCredentials(BadCredentialsException ex){
-        RestErrorMessage error = new RestErrorMessage(HttpStatus.UNAUTHORIZED, "Invalid email and password");
+        RestErrorMessage error = new RestErrorMessage(HttpStatus.UNAUTHORIZED, "E-mail e senha inválidos");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
         StandardError err = new StandardError (
                 System.currentTimeMillis(),
                 status.value(),
-                "Access Invalid",
+                "Acesso inválido",
                 e.getMessage(),
                 request.getRequestURI()
         );
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
         StandardError err = new StandardError (
                 System.currentTimeMillis(),
                 status.value(),
-                "Moderation Service Unavailable",
+                "Serviço de moderação indisponível",
                 e.getMessage(),
                 request.getRequestURI()
         );
@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RestErrorMessage> handleGeneralException(Exception e) {
         e.printStackTrace();
-        RestErrorMessage threatResponse = new RestErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR, "An internal server error occurred.");
+            RestErrorMessage threatResponse = new RestErrorMessage(HttpStatus.INTERNAL_SERVER_ERROR, "Ocorreu um erro interno no servidor");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(threatResponse);
     }
 
@@ -105,7 +105,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<RestErrorMessage> handleDisabledException(DisabledException ex) {
         RestErrorMessage error = new RestErrorMessage(
                 HttpStatus.FORBIDDEN,
-                "Account not verified. Please check your email to verify your account before logging in."
+                "Conta não verificada. Por favor, verifique seu e-mail para verificar sua conta antes de fazer login"
         );
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }

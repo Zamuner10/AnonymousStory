@@ -127,7 +127,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setTo(toEmail);
-            helper.setSubject("Passowrd Reset - Anonymous Stories");
+                helper.setSubject("Redefinição de Senha - Histórias Anônimas");
 
             String htmlContent = """
                     <!DOCTYPE html>
@@ -158,7 +158,7 @@ public class EmailService {
                     helper.setText(htmlContent, true);
                     mailSender.send(message);
         }catch (MessagingException e) {
-            throw new RuntimeException("Falied to send password reset email.", e);
+            throw new RuntimeException("Falha ao enviar o e-mail de redefinição de senha.", e);
         }
     }
 }

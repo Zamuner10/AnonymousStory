@@ -4,12 +4,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record StoryRequestDTO(
-        @NotBlank(message = "Title is requerid")
-        @Size(min = 5,  max = 80, message = "Title must be between 5 and 80 characters")
+        @NotBlank(message = "Título obrigatório")
+        @Size(min = 5,  max = 80, message = "O título deve ter entre 5 e 80 caracteres")
         String title,
 
-        @NotBlank(message = "Content is requerid")
-        @Size(min = 30, max = 500, message = "Content must be between 30 and 500 characters")
+        @NotBlank(message = "Conteúdo obrigatório")
+        @Size(min = 30, max = 700, message = "O conteúdo deve ter entre 30 e 700 caracteres")
         String content,
 
         // CORRIGIDO: estava "isAnonymous" — isso muda o nome da chave que a

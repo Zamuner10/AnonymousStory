@@ -163,10 +163,10 @@ public class UserService {
     @Transactional
     public void resetPassword(ResetPasswordRequestDTO dto) {
         User user = userRepository.findByPasswordResetToken(dto.token())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid or non-existent password reset token."));
+                .orElseThrow(() -> new IllegalArgumentException("Token de redefinição de senha inválido ou inexistente."));
 
         if (user.getPasswordResetTokenExpiry() == null || user.getPasswordResetTokenExpiry().isBefore(LocalDateTime.now())){
-            throw  new IllegalArgumentException("The password reset link has expired. Please request a new link");
+            throw  new IllegalArgumentException("O link para redefinição de senha expirou. Solicite um novo link");
         }
 
         user.setPassword(passwordEncoder.encode(dto.newPassword()));

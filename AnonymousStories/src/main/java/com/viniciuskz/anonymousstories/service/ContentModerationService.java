@@ -63,7 +63,7 @@ public class ContentModerationService {
             String cleanResponse = (response != null) ? response.trim().toLowerCase() : "";
 
             if ("true".equals(cleanResponse)) {
-                throw new ContentModerationException("The submitted content violates the terms of use and community guidelines.");
+                throw new ContentModerationException("O conteúdo enviado viola os termos de uso e as diretrizes da comunidade");
             }
 
         } catch (ContentModerationException e) {
@@ -77,16 +77,17 @@ public class ContentModerationService {
     }
     private void checkPIIAndSpam(String text) {
         if (CPF_PATTERN.matcher(text).find() || EMAIL_PATTERN.matcher(text).find() || PHONE_PATTERN.matcher(text).find()) {
-            throw new ContentModerationException("Content contains private personal information (CPF, email, or phone number).");
+            throw new ContentModerationException("O conteúdo contém informações pessoais privadas (CPF, e-mail ou número de telefone).");
         }
 
         if (CREDIT_CARD_PATTERN.matcher(text).find()) {
-            throw new ContentModerationException("Content contains potentially sensitive financial information (Credit Card).");
+            throw new ContentModerationException("\n" +
+                    "O conteúdo contém informações financeiras potencialmente sensíveis (cartão de crédito).");
         }
 
         long urlCount = URL_SPAM_PATTERN.matcher(text).results().count();
         if (urlCount > 2) {
-            throw new ContentModerationException("Content flagged as spam due to excessive external links.");
+            throw new ContentModerationException("Conteúdo sinalizado como spam devido ao excesso de links externos.");
         }
     }
 }

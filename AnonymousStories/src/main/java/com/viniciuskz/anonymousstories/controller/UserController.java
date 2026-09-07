@@ -245,14 +245,14 @@ UserController {
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO dto){
         userService.processForgotPassword(dto);
-        return ResponseEntity.ok(Map.of( "message", "If this email address is registered on our platform, you will receive a password reset link."));
+        return ResponseEntity.ok(Map.of( "message", "Se este endereço de e-mail estiver cadastrado em nossa plataforma, você receberá um link para redefinir sua senha."));
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword (@Valid @RequestBody ResetPasswordRequestDTO dto){
         userService.resetPassword(dto);
         return ResponseEntity.ok(Map.of(
-                "message", "Password changed successfully! You can now log in with your new password."
+                "message", "Senha alterada com sucesso! Agora você pode acessar sua conta com a nova senha."
         ));
     }
 }

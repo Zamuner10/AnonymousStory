@@ -19,7 +19,7 @@ public class Story {
     private String title;
 
     @NotBlank
-    @Size(min=30, max=500)
+    @Size(min=30, max=700)
     @Column(nullable = false, columnDefinition="TEXT")
     private String content;
 

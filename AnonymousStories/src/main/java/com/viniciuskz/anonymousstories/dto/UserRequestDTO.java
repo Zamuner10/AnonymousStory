@@ -7,21 +7,21 @@ import jakarta.validation.constraints.NotNull;
 
 public record UserRequestDTO (
 
-    @NotBlank(message = "Name is mandatory")
+    @NotBlank(message = "Nome é obrigatório")
     String name,
 
-    @NotBlank (message = "Email is required.")
-    @Email(message = "Format invalid")
+    @NotBlank (message = "E-mail é obrigatório")
+    @Email(message = "Formato inválido")
     String email,
 
-    @NotBlank (message = " PassWord is required.")
+    @NotBlank (message = "Senha é obrigatório")
     String password,
 
-    @NotBlank (message = "Password confirmation is required." )
+    @NotBlank (message = "Confirmar senha obrigatório" )
     String confirmPassword,
 
-    @NotNull (message = "Age is required")
-    @Min(value = 13, message= "User must be at least 13 years old")
+    @NotNull (message = "Idade obrigatória")
+    @Min(value = 13, message= "O usuário deve ter pelo menos 13 anos de idade")
     Integer age
 
             ){}

@@ -5,7 +5,7 @@ import { api } from "../services/api";
 import { useAuth } from "../contexts/AuthContext";
 import { SketchButton } from "../components/SketchUI";
 
-const MAX_CONTENT = 500;
+const MAX_CONTENT = 700;
 const MIN_CONTENT = 30;
 const MAX_TITLE = 80;
 const MIN_TITLE = 5;
@@ -329,7 +329,7 @@ export function CreateStory() {
           color: "#7a5a2a",
         }}
       >
-        ← voltar para o mural
+        voltar para o mural
       </button>
     </div>
   );
