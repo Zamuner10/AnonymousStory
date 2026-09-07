@@ -2,9 +2,12 @@ package com.viniciuskz.anonymousstories.service;
 
 import com.viniciuskz.anonymousstories.exception.ContentModerationException;
 import com.viniciuskz.anonymousstories.exception.ModerationServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 
 import java.time.Duration;
 import java.util.regex.Pattern;
@@ -15,6 +18,8 @@ public class ContentModerationService {
     private RestClient restClient;
 
     private static final String PURGOMALUM_URL = "https://www.purgomalum.com/service/containsprofanity";
+
+    private static final Logger log = LoggerFactory.getLogger(ContentModerationException.class);
 
     // Padrões Regex existentes (PII e Spam)
     private static final Pattern CPF_PATTERN = Pattern.compile("\\b\\d{3}\\.?\\d{3}\\.?\\d{3}-?\\d{2}\\b");
@@ -41,15 +46,15 @@ public class ContentModerationService {
     }
 
     public void validateText(String text) {
+
         if (text == null || text.trim().isEmpty()){
             return;
         }
-
         // 1. Validações locais rigorosas (CPF, Cartão, E-mail, Telefone, Spam)
         checkPIIAndSpam(text);
-
         // 2. Validação via API Externa (com proteção contra queda/timeout)
         try {
+
             String response = restClient.get()
                     .uri(PURGOMALUM_URL + "?text={text}", text)
                     .retrieve()
@@ -64,10 +69,10 @@ public class ContentModerationService {
         } catch (ContentModerationException e) {
             // Se foi bloqueado por palavrão ou PII, repassa a exceção de moderação
             throw e;
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             // Se a API externa cair, der timeout ou falhar, APENAS LOGA O ERRO no terminal
             // e NÃO trava o salvamento da carta do usuário!
-            System.err.println("Aviso: Falha ao consultar serviço externo PurgoMalum: " + e.getMessage());
+            log.warn("Aviso: Falha ao consultar serviço externo PurgoMalum: " + e.getMessage());
         }
     }
     private void checkPIIAndSpam(String text) {

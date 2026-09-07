@@ -2,6 +2,7 @@ package com.viniciuskz.anonymousstories.service;
 
 import com.viniciuskz.anonymousstories.exception.ContentModerationException;
 import com.viniciuskz.anonymousstories.exception.ModerationServiceException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -67,13 +68,15 @@ public class ContentModerationServiceTest {
     }
 
     @Test
-    @DisplayName("Should throw ModerationServiceException when the external API is unavailable")
+    @DisplayName("Should handle external API failure gracefully")
     void validateText_ApiUnavailable() {
         mockServer.expect(requestTo(containsString("purgomalum.com")))
-                .andRespond(withServerError()); // Simula resposta 500
+                .andRespond(withServerError());
 
-        assertThrows(ModerationServiceException.class, () ->
-                this.moderationService.validateText("Any text for analysis"));
+        Assertions.assertDoesNotThrow(() -> {
+            // Altere aqui de contentModerationService para this.moderationService
+            this.moderationService.validateText("Texto de teste");
+        });
 
         mockServer.verify();
     }
