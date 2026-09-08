@@ -8,7 +8,7 @@ import { api } from "../services/api";
 
 function FormBox({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-[380px] max-w-[92vw] my-2">
+    <div className="relative w-[380px] max-w-[94vw] my-auto">
       <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none">
         <defs>
           <filter id="form-sk-r">
@@ -17,10 +17,10 @@ function FormBox({ children }: { children: React.ReactNode }) {
           </filter>
         </defs>
         <rect 
-          x="5" 
-          y="5" 
-          width="calc(100% - 10px)" 
-          height="calc(100% - 10px)" 
+          x="4" 
+          y="4" 
+          width="calc(100% - 8px)" 
+          height="calc(100% - 8px)" 
           rx="6"
           fill="rgba(255,254,248,0.97)" 
           stroke="#1a1208" 
@@ -29,8 +29,8 @@ function FormBox({ children }: { children: React.ReactNode }) {
         />
       </svg>
       {/* Margem vermelha de folha de caderno */}
-      <div className="absolute top-[10px] bottom-[10px] left-[32px] sm:left-[45px] w-[1px] bg-[rgba(220,80,60,0.18)] z-10" />
-      <div className="relative z-20 px-3 py-4 sm:px-[30px] sm:pt-[20px] sm:pb-[18px]">
+      <div className="absolute top-[8px] bottom-[8px] left-[26px] sm:left-[36px] w-[1px] bg-[rgba(220,80,60,0.18)] z-10" />
+      <div className="relative z-20 px-3 py-3 sm:px-[28px] sm:py-[20px]">
         {children}
       </div>
     </div>
@@ -69,12 +69,12 @@ function PasswordInputWithToggle({
         title={show ? "Ocultar senha" : "Mostrar senha"}
       >
         {show ? (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
             <line x1="1" y1="1" x2="23" y2="23"></line>
           </svg>
         ) : (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
             <circle cx="12" cy="12" r="3"></circle>
           </svg>
@@ -145,11 +145,10 @@ export function Register() {
   };
 
   return (
-    /* Força rolagem vertical pura no body/window com h-auto e pb-32 */
-    <div className="relative w-full min-h-screen h-auto overflow-y-auto bg-[#f7f3eb]">
+    <div className="relative w-full min-h-[100dvh] overflow-y-auto py-3 pb-12 flex flex-col items-center justify-center bg-[#f7f3eb]">
       <Background fadeStrength="heavy" />
 
-      {/* Doodles decorativos nos cantos */}
+      {/* Doodles decorativos */}
       <svg className="fixed inset-0 w-full h-full pointer-events-none" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
         <defs>
           <filter id="d3">
@@ -161,24 +160,23 @@ export function Register() {
         <text x="1090" y="550" fontSize="14" fill="#1a1208" opacity="0.1" filter="url(#d3)" fontFamily="serif">✦</text>
       </svg>
 
-      {/* Wrapper de Bloco sequencial com respiro de 120px no final */}
-      <div className="relative z-10 flex flex-col items-center w-full px-2 pt-6 pb-32">
-        {/* Logo superior */}
+      <div className="relative z-10 flex flex-col items-center w-full px-2 my-auto">
+        {/* Logo superior compacta */}
         <button 
           onClick={() => navigate("/")} 
-          className="bg-transparent border-none cursor-pointer mb-2 group touch-manipulation min-h-[44px] flex items-center justify-center"
+          className="bg-transparent border-none cursor-pointer mb-1 group touch-manipulation min-h-[38px] flex items-center justify-center"
         >
-          <span className="font-['Caveat'] text-[24px] sm:text-[26px] font-bold text-[#1a1208] group-hover:opacity-80 active:opacity-60 transition-opacity">
+          <span className="font-['Caveat'] text-[22px] sm:text-[25px] font-bold text-[#1a1208] group-hover:opacity-80 transition-opacity">
             Histórias <span className="text-[#b07030]">Anônimas</span>
           </span>
         </button>
 
         <FormBox>
-          <div className="text-center mb-1">
-            <h2 className="font-['Caveat'] text-[24px] sm:text-[26px] font-bold text-[#1a1208] m-0 leading-none">
+          <div className="text-center mb-0.5">
+            <h2 className="font-['Caveat'] text-[22px] sm:text-[25px] font-bold text-[#1a1208] m-0 leading-none">
               Criar sua conta
             </h2>
-            <p className="font-['Caveat'] text-[15px] sm:text-[17px] text-[#7a5a2a] mt-1">
+            <p className="font-['Caveat'] text-[13px] sm:text-[15px] text-[#7a5a2a] mt-0.5">
               e comece a deixar sua marca
             </p>
           </div>
@@ -187,14 +185,14 @@ export function Register() {
 
           {/* Feedback de Erro ou Sucesso */}
           {error && (
-            <p className="font-['Caveat'] text-[15px] text-[#b91c1c] text-center mt-2">
+            <p className="font-['Caveat'] text-[14px] text-[#b91c1c] text-center my-1">
               {error}
             </p>
           )}
 
           {successMessage ? (
-            <div className="text-center mt-3">
-              <p className="font-['Caveat'] text-[18px] text-[#15803d] mb-3">
+            <div className="text-center my-2">
+              <p className="font-['Caveat'] text-[17px] text-[#15803d] mb-2">
                 {successMessage}
               </p>
               <SketchButton seed={52} variant="primary" onClick={() => navigate("/login")}>
@@ -202,7 +200,7 @@ export function Register() {
               </SketchButton>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-2">
+            <form onSubmit={handleSubmit} className="mt-1 flex flex-col gap-1.5">
               <div>
                 <Label>Como podemos te chamar?</Label>
                 <SketchInput
@@ -246,9 +244,6 @@ export function Register() {
                   seed={43}
                   autoComplete="new-password"
                 />
-                <p className="font-['Caveat'] text-[13px] text-[#7a5a2a] mt-0.5 ml-1">
-                  * a senha deve conter pelo menos 8 caracteres
-                </p>
               </div>
 
               <div>
@@ -262,42 +257,42 @@ export function Register() {
                 />
               </div>
 
-              <p className="font-['Caveat'] text-[15px] sm:text-[17px] text-[#5a4020] text-center leading-[1.2] mt-1">
+              <p className="font-['Caveat'] text-[13px] sm:text-[15px] text-[#5a4020] text-center leading-[1.1] my-1">
                 ao criar uma conta você concorda em compartilhar
                 suas histórias de forma anônima e respeitosa
               </p>
 
               {/* Botão de Cadastrar */}
-              <div className="mt-2 transition-all duration-200 hover:opacity-90 active:scale-[0.98] touch-manipulation">
+              <div className="mt-1 transition-all duration-200 hover:opacity-90 active:scale-[0.98] touch-manipulation">
                 <SketchButton seed={51} variant="primary" type="submit">
                   {loading ? "Criando..." : "Criar conta"}
                 </SketchButton>
               </div>
 
-              <SketchDivider seed={18} />
+              <div className="text-center mt-2 flex flex-col items-center gap-1">
+                <div>
+                  <span className="font-['Caveat'] text-[15px] sm:text-[17px] text-[#5a4020]">já tem uma conta?{" "}</span>
+                  <button 
+                    type="button" 
+                    onClick={() => navigate("/login")} 
+                    className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[15px] sm:text-[17px] text-[#b07030] hover:text-[#4169E1] active:text-[#4169E1] underline p-0 transition-colors touch-manipulation inline"
+                  >
+                    entrar
+                  </button>
+                </div>
 
-              <div className="text-center">
-                <span className="font-['Caveat'] text-[17px] sm:text-[19px] text-[#5a4020]">já tem uma conta?{" "}</span>
+                {/* Botão de Voltar diretamente colado abaixo do Login */}
                 <button 
                   type="button" 
-                  onClick={() => navigate("/login")} 
-                  className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[17px] sm:text-[19px] text-[#b07030] hover:text-[#4169E1] active:text-[#4169E1] underline py-1 px-1 transition-colors touch-manipulation inline-flex items-center"
+                  onClick={() => navigate("/")} 
+                  className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[15px] sm:text-[17px] text-[#7a5a2a] hover:text-[#1a1208] active:text-[#1a1208] underline transition-colors touch-manipulation min-h-[38px] flex items-center justify-center mt-1"
                 >
-                  entrar
+                  ← voltar para o início
                 </button>
               </div>
             </form>
           )}
         </FormBox>
-
-        {/* Botão de Voltar posicionado logo abaixo do card com margin-top de 24px */}
-        <button 
-          type="button" 
-          onClick={() => navigate("/")} 
-          className="mt-6 px-6 py-2.5 min-h-[48px] bg-[#fffdfc] border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[18px] font-bold text-[#1a1208] flex items-center justify-center gap-2 hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] transition-colors shadow-sm touch-manipulation z-30"
-        >
-          voltar para o início
-        </button>
       </div>
     </div>
   );
