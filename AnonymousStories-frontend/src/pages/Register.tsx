@@ -37,7 +37,6 @@ function FormBox({ children }: { children: React.ReactNode }) {
   );
 }
 
-{/* Subcomponente para o Campo de Senha com o Botão de Olho para Mostrar/Ocultar */}
 function PasswordInputWithToggle({
   value,
   onChange,
@@ -69,7 +68,6 @@ function PasswordInputWithToggle({
         className="absolute right-2 bg-transparent border-none cursor-pointer p-1 text-[#7a5a2a] hover:text-[#1a1208] transition-colors touch-manipulation min-h-[36px] flex items-center justify-center z-10"
         title={show ? "Ocultar senha" : "Mostrar senha"}
       >
-        {/* Ícone de Olho feito em SVG com estilo de traço */}
         {show ? (
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
@@ -147,7 +145,8 @@ export function Register() {
   };
 
   return (
-    <div className="relative w-full min-h-[100dvh] overflow-y-auto py-6 pb-20 flex items-center justify-center bg-[#f7f3eb]">
+    /* Wrapper com min-h-[100dvh], pb-28 (espaço gigante de respiro para rolar o botão no celular) */
+    <div className="relative w-full min-h-[100dvh] overflow-y-auto py-4 pb-28 flex flex-col items-center justify-start bg-[#f7f3eb]">
       <Background fadeStrength="heavy" />
 
       {/* Doodles decorativos nos cantos */}
@@ -162,12 +161,11 @@ export function Register() {
         <text x="1090" y="550" fontSize="14" fill="#1a1208" opacity="0.1" filter="url(#d3)" fontFamily="serif">✦</text>
       </svg>
 
-      {/* Ajuste do Flexbox: my-4 no celular e sm:my-auto em telas maiores para liberar a rolagem perfeita */}
-      <div className="relative z-10 flex flex-col items-center my-4 sm:my-auto w-full px-2">
+      <div className="relative z-10 flex flex-col items-center w-full px-2 mt-2">
         {/* Logo superior */}
         <button 
           onClick={() => navigate("/")} 
-          className="bg-transparent border-none cursor-pointer mb-2 group touch-manipulation min-h-[44px] flex items-center justify-center"
+          className="bg-transparent border-none cursor-pointer mb-3 group touch-manipulation min-h-[44px] flex items-center justify-center"
         >
           <span className="font-['Caveat'] text-[24px] sm:text-[26px] font-bold text-[#1a1208] group-hover:opacity-80 active:opacity-60 transition-opacity">
             Histórias <span className="text-[#b07030]">Anônimas</span>
@@ -268,7 +266,7 @@ export function Register() {
                 suas histórias de forma anônima e respeitosa
               </p>
 
-              {/* Botão de Cadastrar padronizado */}
+              {/* Botão de Cadastrar */}
               <div className="mt-2 transition-all duration-200 hover:opacity-90 active:scale-[0.98] touch-manipulation">
                 <SketchButton seed={51} variant="primary" type="submit">
                   {loading ? "Criando..." : "Criar conta"}
@@ -291,10 +289,11 @@ export function Register() {
           )}
         </FormBox>
 
+        {/* Botão de Voltar para o início visível abaixo do formulário */}
         <button 
           type="button" 
           onClick={() => navigate("/")} 
-          className="mt-4 px-5 py-2.5 min-h-[44px] bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[17px] font-bold text-[#1a1208] flex items-center justify-center gap-[6px] hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] focus:bg-[#1a1208] focus:text-[#f7f3eb] transition-colors shadow-sm select-none touch-manipulation"
+          className="mt-5 mb-8 px-6 py-2.5 min-h-[44px] bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[17px] font-bold text-[#1a1208] flex items-center justify-center gap-[6px] hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] focus:bg-[#1a1208] focus:text-[#f7f3eb] transition-colors shadow-sm select-none touch-manipulation z-30"
         >
           voltar para o início
         </button>
