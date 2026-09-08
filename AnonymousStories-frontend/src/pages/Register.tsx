@@ -238,7 +238,7 @@ export function Register() {
               <div>
                 <Label>Crie uma senha</Label>
                 <PasswordInputWithToggle
-                  placeholder="mínimo de 6 caracteres"
+                  placeholder="mínimo de 8 caracteres"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   seed={43}
