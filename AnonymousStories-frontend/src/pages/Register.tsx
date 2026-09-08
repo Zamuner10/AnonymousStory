@@ -8,7 +8,7 @@ import { api } from "../services/api";
 
 function FormBox({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-[380px] max-w-[92vw]">
+    <div className="relative w-[380px] max-w-[92vw] my-2">
       <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none">
         <defs>
           <filter id="form-sk-r">
@@ -145,8 +145,8 @@ export function Register() {
   };
 
   return (
-    /* Wrapper com min-h-[100dvh], pb-28 (espaço gigante de respiro para rolar o botão no celular) */
-    <div className="relative w-full min-h-[100dvh] overflow-y-auto py-4 pb-28 flex flex-col items-center justify-start bg-[#f7f3eb]">
+    /* Força rolagem vertical pura no body/window com h-auto e pb-32 */
+    <div className="relative w-full min-h-screen h-auto overflow-y-auto bg-[#f7f3eb]">
       <Background fadeStrength="heavy" />
 
       {/* Doodles decorativos nos cantos */}
@@ -161,11 +161,12 @@ export function Register() {
         <text x="1090" y="550" fontSize="14" fill="#1a1208" opacity="0.1" filter="url(#d3)" fontFamily="serif">✦</text>
       </svg>
 
-      <div className="relative z-10 flex flex-col items-center w-full px-2 mt-2">
+      {/* Wrapper de Bloco sequencial com respiro de 120px no final */}
+      <div className="relative z-10 flex flex-col items-center w-full px-2 pt-6 pb-32">
         {/* Logo superior */}
         <button 
           onClick={() => navigate("/")} 
-          className="bg-transparent border-none cursor-pointer mb-3 group touch-manipulation min-h-[44px] flex items-center justify-center"
+          className="bg-transparent border-none cursor-pointer mb-2 group touch-manipulation min-h-[44px] flex items-center justify-center"
         >
           <span className="font-['Caveat'] text-[24px] sm:text-[26px] font-bold text-[#1a1208] group-hover:opacity-80 active:opacity-60 transition-opacity">
             Histórias <span className="text-[#b07030]">Anônimas</span>
@@ -246,7 +247,7 @@ export function Register() {
                   autoComplete="new-password"
                 />
                 <p className="font-['Caveat'] text-[13px] text-[#7a5a2a] mt-0.5 ml-1">
-                  * a senha deve conter pelo menos 6 caracteres
+                  * a senha deve conter pelo menos 8 caracteres
                 </p>
               </div>
 
@@ -289,11 +290,11 @@ export function Register() {
           )}
         </FormBox>
 
-        {/* Botão de Voltar para o início visível abaixo do formulário */}
+        {/* Botão de Voltar posicionado logo abaixo do card com margin-top de 24px */}
         <button 
           type="button" 
           onClick={() => navigate("/")} 
-          className="mt-5 mb-8 px-6 py-2.5 min-h-[44px] bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[17px] font-bold text-[#1a1208] flex items-center justify-center gap-[6px] hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] focus:bg-[#1a1208] focus:text-[#f7f3eb] transition-colors shadow-sm select-none touch-manipulation z-30"
+          className="mt-6 px-6 py-2.5 min-h-[48px] bg-[#fffdfc] border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[18px] font-bold text-[#1a1208] flex items-center justify-center gap-2 hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] transition-colors shadow-sm touch-manipulation z-30"
         >
           voltar para o início
         </button>
