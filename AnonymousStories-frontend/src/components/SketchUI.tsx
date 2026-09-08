@@ -26,6 +26,7 @@ export function SketchInput({
       <style>{`
         .${wrapperClass} input {
           color-scheme: light;
+          touch-action: manipulation;
         }
         .${wrapperClass} input:-webkit-autofill,
         .${wrapperClass} input:-webkit-autofill:hover,
@@ -82,17 +83,17 @@ export function SketchInput({
         value={value}
         onChange={onChange}
         autoComplete={autoComplete}
+        className="text-[16px] sm:text-[18px]"
         style={{
           position: 'relative',
           zIndex: 2,
           width: '100%',
-          minHeight: 44, // Garantia obrigatoria de toque mobile (44px)
+          minHeight: 44, // Garantia de toque móvel confortável
           padding: '10px 14px',
           background: 'transparent',
           border: 'none',
           outline: 'none',
           fontFamily: 'Caveat, cursive',
-          fontSize: 18,
           color: '#1a1208',
           boxSizing: 'border-box',
         }}
@@ -132,13 +133,15 @@ export function SketchButton({
         .${wrapperClass} rect {
           transition: fill 0.2s ease;
         }
-        .${wrapperClass}:hover rect {
+        .${wrapperClass}:hover rect, .${wrapperClass}:active rect {
           fill: ${hoverFill};
         }
         .${wrapperClass} button {
           transition: color 0.2s ease;
+          touch-action: manipulation;
+          user-select: none;
         }
-        .${wrapperClass}:hover button {
+        .${wrapperClass}:hover button, .${wrapperClass}:active button {
           color: ${hoverText} !important;
         }
       `}</style>
@@ -185,11 +188,12 @@ export function SketchButton({
       <button
         type={type}
         onClick={onClick}
+        className="text-[18px] sm:text-[20px]"
         style={{
           position: 'relative',
           zIndex: 2,
           width: '100%',
-          minHeight: 44, // Garantia obrigatoria de toque mobile (44px)
+          minHeight: 44, // Área mínima de toque mobile recomendada
           minWidth: 44,
           padding: '10px 16px',
           background: 'transparent',
@@ -197,13 +201,13 @@ export function SketchButton({
           outline: 'none',
           cursor: 'pointer',
           fontFamily: 'Caveat, cursive',
-          fontSize: 20,
           fontWeight: 700,
           color: baseText,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           boxSizing: 'border-box',
+          whiteSpace: 'nowrap',
         }}
       >
         {children}
@@ -223,6 +227,7 @@ export function Label({ children }: { children: React.ReactNode }) {
         color: '#1a1208',
         marginBottom: 4,
         fontWeight: 600,
+        userSelect: 'none',
       }}
     >
       {children}
@@ -240,7 +245,7 @@ export function SketchDivider({ seed = 1 }: { seed?: number }) {
       height="12"
       viewBox="0 0 300 12"
       preserveAspectRatio="none"
-      style={{ display: 'block', margin: '12px 0' }}
+      style={{ display: 'block', margin: '12px 0', pointerEvents: 'none' }}
     >
       <defs>
         <filter id={filterId}>

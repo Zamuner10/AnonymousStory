@@ -1,3 +1,4 @@
+// src/pages/CreateStory.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -67,14 +68,14 @@ export function CreateStory() {
 
   return (
     <div
-      className="w-full min-h-[100dvh] overflow-y-auto flex flex-col items-center justify-start p-4 sm:p-6"
+      className="w-full min-h-[100dvh] overflow-y-auto flex flex-col items-center justify-start p-3 sm:p-6 pb-20"
       style={{
         position: "relative",
         background: "#f7f3eb",
         boxSizing: "border-box",
       }}
     >
-      {/* Fundo pautado quadriculado — mesmo padrão do resto do site */}
+      {/* Fundo pautado quadriculado */}
       <div
         style={{
           position: "absolute",
@@ -89,14 +90,15 @@ export function CreateStory() {
       {/* Logotipo */}
       <button
         onClick={() => navigate("/")}
+        className="touch-manipulation min-h-[44px] flex items-center justify-center"
         style={{
           position: "relative",
           zIndex: 10,
           background: "none",
           border: "none",
           cursor: "pointer",
-          marginBottom: 18,
-          marginTop: 12,
+          marginBottom: 12,
+          marginTop: 8,
         }}
       >
         <span style={{ fontFamily: "Caveat, cursive", fontSize: 26, fontWeight: 700, color: "#1a1208" }}>
@@ -104,8 +106,9 @@ export function CreateStory() {
         </span>
       </button>
 
-      {/* A carta — com maxWidth responsivo e sem trava rígida de altura para não estourar em telas pequenas */}
+      {/* A carta */}
       <div
+        className="my-3 sm:my-auto"
         style={{
           position: "relative",
           zIndex: 10,
@@ -113,7 +116,6 @@ export function CreateStory() {
           maxWidth: "94vw",
           display: "flex",
           flexDirection: "column",
-          margin: "auto 0",
         }}
       >
         <svg
@@ -151,7 +153,7 @@ export function CreateStory() {
           }}
         />
 
-        {/* Conteúdo interno com padding dinâmico (p-4 no mobile, p-8 no desktop) */}
+        {/* Conteúdo interno */}
         <div
           className="p-4 sm:p-8"
           style={{
@@ -174,18 +176,19 @@ export function CreateStory() {
           ) : (
             <>
               {/* Cabeçalho: De / Data */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                 <button
                   type="button"
                   onClick={() => setAnonymous((a) => !a)}
                   title="Clique para trocar entre Anônimo e seu nome"
+                  className="touch-manipulation min-h-[44px] flex items-center"
                   style={{
                     background: "none",
                     border: "none",
                     cursor: "pointer",
                     padding: 0,
                     fontFamily: "Caveat, cursive",
-                    fontSize: 16,
+                    fontSize: 17,
                     color: "#7a5a2a",
                     textDecoration: "underline dotted",
                   }}
@@ -198,12 +201,12 @@ export function CreateStory() {
               </div>
 
               {/* Para: */}
-              <p style={{ fontFamily: "Caveat, cursive", fontSize: 16, color: "#7a5a2a", opacity: 0.75, marginBottom: 10 }}>
+              <p style={{ fontFamily: "Caveat, cursive", fontSize: 16, color: "#7a5a2a", opacity: 0.75, marginBottom: 8 }}>
                 Para: quem vai ler isso?
               </p>
 
               {/* Assunto */}
-              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14, borderBottom: "1px dashed rgba(26,18,8,0.25)", paddingBottom: 6 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 12, borderBottom: "1px dashed rgba(26,18,8,0.25)", paddingBottom: 6 }}>
                 <label style={{ fontFamily: "Caveat, cursive", fontSize: 15, color: "#7a5a2a", opacity: 0.75, whiteSpace: "nowrap" }}>
                   Assunto:
                 </label>
@@ -220,11 +223,11 @@ export function CreateStory() {
                     border: "none",
                     outline: "none",
                     fontFamily: "Caveat, cursive",
-                    fontSize: 17,
+                    fontSize: 18,
                     color: "#1a1208",
                   }}
                 />
-                <span style={{ fontFamily: "Caveat, cursive", fontSize: 12, color: "#a08860", whiteSpace: "nowrap" }}>
+                <span style={{ fontFamily: "Caveat, cursive", fontSize: 13, color: "#a08860", whiteSpace: "nowrap" }}>
                   {title.length}/{MAX_TITLE}
                 </span>
               </div>
@@ -234,9 +237,10 @@ export function CreateStory() {
                 value={content}
                 onChange={(e) => setContent(e.target.value.slice(0, MAX_CONTENT))}
                 placeholder={"Escreva aqui a sua história...\n\nSeja ela de um amor, uma conquista ou uma perda.\nEsta carta será lida por alguém, um dia."}
+                className="touch-manipulation"
                 style={{
                   flex: 1,
-                  minHeight: 180,
+                  minHeight: 160,
                   width: "100%",
                   background: "transparent",
                   border: "none",
@@ -277,14 +281,14 @@ export function CreateStory() {
                 </p>
               )}
 
-              {/* Botões responsivos: flex-col no mobile (< 640px) e flex-row em telas maiores */}
+              {/* Botões responsivos */}
               <div className="flex flex-col sm:flex-row gap-3 mt-3 w-full">
-                <div className="w-full sm:flex-1" style={{ opacity: loading ? 0.5 : 1, pointerEvents: loading ? "none" : "auto" }}>
+                <div className="w-full sm:flex-1 touch-manipulation" style={{ opacity: loading ? 0.5 : 1, pointerEvents: loading ? "none" : "auto" }}>
                   <SketchButton seed={71} variant="ghost" onClick={handleClear}>
                     Apagar
                   </SketchButton>
                 </div>
-                <div className="w-full sm:flex-1" style={{ opacity: loading ? 0.7 : 1, pointerEvents: loading ? "none" : "auto" }}>
+                <div className="w-full sm:flex-1 touch-manipulation" style={{ opacity: loading ? 0.7 : 1, pointerEvents: loading ? "none" : "auto" }}>
                   <SketchButton seed={72} variant="primary" onClick={handleSubmit}>
                     {loading ? "Enviando..." : "Enviar carta ✉"}
                   </SketchButton>
@@ -299,16 +303,17 @@ export function CreateStory() {
       <button
         type="button"
         onClick={() => navigate("/feed")}
+        className="touch-manipulation min-h-[44px] flex items-center justify-center"
         style={{
           position: "relative",
           zIndex: 10,
-          marginTop: 18,
+          marginTop: 14,
           marginBottom: 12,
           background: "none",
           border: "none",
           cursor: "pointer",
           fontFamily: "Caveat, cursive",
-          fontSize: 16,
+          fontSize: 17,
           color: "#7a5a2a",
         }}
       >

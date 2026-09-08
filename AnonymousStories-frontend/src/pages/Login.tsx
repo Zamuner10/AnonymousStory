@@ -42,11 +42,58 @@ function FormBox({ children }: { children: React.ReactNode }) {
         />
       </svg>
       {/* Margem vermelha de folha */}
-      <div className="absolute top-[10px] bottom-[10px] left-[36px] sm:left-[52px] w-[1px] bg-[rgba(220,80,60,0.18)] z-10" />
-      {/* Padding ajustado para mobile: px-5 py-6 no celular, px-[36px] em telas maiores */}
-      <div className="relative z-20 px-5 py-6 sm:px-[36px] sm:pt-[36px] sm:pb-[32px]">
+      <div className="absolute top-[10px] bottom-[10px] left-[32px] sm:left-[52px] w-[1px] bg-[rgba(220,80,60,0.18)] z-10" />
+      <div className="relative z-20 px-4 py-5 sm:px-[36px] sm:pt-[36px] sm:pb-[32px]">
         {children}
       </div>
+    </div>
+  );
+}
+
+{/* Subcomponente para o Campo de Senha com o Botão de Olho */}
+function PasswordInputWithToggle({
+  value,
+  onChange,
+  placeholder,
+  seed,
+  autoComplete,
+}: {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder: string;
+  seed: number;
+  autoComplete?: string;
+}) {
+  const [show, setShow] = useState(false);
+
+  return (
+    <div className="relative flex items-center w-full">
+      <SketchInput
+        type={show ? "text" : "password"}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        seed={seed}
+        autoComplete={autoComplete}
+      />
+      <button
+        type="button"
+        onClick={() => setShow(!show)}
+        className="absolute right-2 bg-transparent border-none cursor-pointer p-1 text-[#7a5a2a] hover:text-[#1a1208] transition-colors touch-manipulation min-h-[36px] flex items-center justify-center z-10"
+        title={show ? "Ocultar senha" : "Mostrar senha"}
+      >
+        {show ? (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+        ) : (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        )}
+      </button>
     </div>
   );
 }
@@ -58,10 +105,12 @@ export function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [needsVerification, setNeedsVerification] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setNeedsVerification(false);
     setLoading(true);
 
     try {
@@ -70,7 +119,11 @@ export function Login() {
       navigate("/write");
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.message || "E-mail ou senha incorretos.");
+        const message = err.response?.data?.message || "E-mail ou senha incorretos.";
+        setError(message);
+        if (message.toLowerCase().includes("verific") || message.toLowerCase().includes("confirm")) {
+          setNeedsVerification(true);
+        }
       } else {
         setError("Ocorreu um erro inesperado.");
       }
@@ -80,8 +133,7 @@ export function Login() {
   };
 
   return (
-    /* Usando min-h-[100dvh] e pb-12 para garantir rolagens fluidas quando o teclado mobile abrir */
-    <div className="relative w-full min-h-[100dvh] overflow-y-auto py-8 pb-12 flex items-center justify-center bg-[#f7f3eb]">
+    <div className="relative w-full min-h-[100dvh] overflow-y-auto py-6 pb-20 flex items-center justify-center bg-[#f7f3eb]">
       <Background fadeStrength="heavy" />
 
       {/* Ilustrações e Rabiscos nos cantos */}
@@ -94,24 +146,13 @@ export function Login() {
         </defs>
         <text x="80" y="140" fontSize="20" fill="#1a1208" opacity="0.12" filter="url(#d2)" fontFamily="serif">✦</text>
         <text x="1100" y="580" fontSize="16" fill="#1a1208" opacity="0.11" filter="url(#d2)" fontFamily="serif">✦</text>
-        <g transform="translate(60, 580) rotate(-15)" opacity="0.12" filter="url(#d2)">
-          <rect x="0" y="0" width="44" height="32" rx="2" stroke="#1a1208" strokeWidth="1.5" fill="none" />
-          <polyline points="0,0 22,18 44,0" stroke="#1a1208" strokeWidth="1.5" fill="none" />
-        </g>
-        <g transform="translate(1090, 90) rotate(30)" opacity="0.12" filter="url(#d2)">
-          <rect x="0" y="0" width="7" height="38" rx="1" stroke="#1a1208" strokeWidth="1.5" fill="none" />
-          <path d="M 0 38 L 3.5 48 L 7 38" stroke="#1a1208" strokeWidth="1.5" fill="none" strokeLinejoin="round" />
-          <line x1="0" y1="7" x2="7" y2="7" stroke="#1a1208" strokeWidth="1" />
-        </g>
-        <text x="1060" y="160" fontSize="14" fill="#1a1208" opacity="0.1" filter="url(#d2)" fontFamily="serif">✦</text>
-        <text x="130" y="560" fontSize="18" fill="#1a1208" opacity="0.1" filter="url(#d2)" fontFamily="serif">✦</text>
       </svg>
 
-      <div className="relative z-10 flex flex-col items-center my-auto w-full px-2">
+      <div className="relative z-10 flex flex-col items-center my-4 sm:my-auto w-full px-2">
         {/* Logotipo */}
         <button
           onClick={() => navigate("/")}
-          className="bg-transparent border-none cursor-pointer mb-[20px] sm:mb-[28px] group touch-manipulation min-h-[44px] flex items-center justify-center"
+          className="bg-transparent border-none cursor-pointer mb-3 group touch-manipulation min-h-[44px] flex items-center justify-center"
         >
           <span className="font-['Caveat'] text-[26px] sm:text-[28px] font-bold text-[#1a1208] tracking-tight group-hover:opacity-80 active:opacity-60 transition-opacity">
             Histórias <span className="text-[#b07030]">Anônimas</span>
@@ -121,8 +162,8 @@ export function Login() {
         <FormBox>
           <form onSubmit={handleSubmit}>
             {/* Cabeçalho */}
-            <div className="text-center mb-[20px] sm:mb-[28px]">
-              <svg width="36" height="28" viewBox="0 0 36 28" fill="none" className="mb-[10px] opacity-55 mx-auto">
+            <div className="text-center mb-3">
+              <svg width="36" height="28" viewBox="0 0 36 28" fill="none" className="mb-2 opacity-55 mx-auto">
                 <defs>
                   <filter id="env-sk">
                     <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="3" result="n" />
@@ -132,10 +173,10 @@ export function Login() {
                 <rect x="1" y="1" width="34" height="26" rx="2" stroke="#1a1208" strokeWidth="1.8" filter="url(#env-sk)" />
                 <polyline points="1,1 18,16 35,1" stroke="#1a1208" strokeWidth="1.8" fill="none" filter="url(#env-sk)" />
               </svg>
-              <h2 className="font-['Caveat'] text-[28px] sm:text-[32px] font-bold text-[#1a1208] m-0 leading-none">
+              <h2 className="font-['Caveat'] text-[26px] sm:text-[30px] font-bold text-[#1a1208] m-0 leading-none">
                 Bem-vindo de volta
               </h2>
-              <p className="font-['Caveat'] text-[15px] sm:text-[16px] text-[#7a5a2a] mt-[6px]">
+              <p className="font-['Caveat'] text-[15px] sm:text-[16px] text-[#7a5a2a] mt-1">
                 entre para continuar sua história
               </p>
             </div>
@@ -144,12 +185,23 @@ export function Login() {
 
             {/* Erro de Login */}
             {error && (
-              <p className="font-['Caveat'] text-[16px] text-[#c0392b] text-center mt-[12px]">
-                {error}
-              </p>
+              <div className="text-center mt-2">
+                <p className="font-['Caveat'] text-[15px] text-[#c0392b] m-0">
+                  {error}
+                </p>
+                {needsVerification && (
+                  <button
+                    type="button"
+                    onClick={() => navigate("/resend-verification")}
+                    className="mt-1 bg-transparent border-none cursor-pointer font-['Caveat'] text-[15px] text-[#b07030] underline hover:text-[#4169E1]"
+                  >
+                    Reenviar e-mail de confirmação
+                  </button>
+                )}
+              </div>
             )}
 
-            <div className="mt-[18px] flex flex-col gap-[16px]">
+            <div className="mt-3 flex flex-col gap-3">
               <div>
                 <Label>seu e-mail</Label>
                 <SketchInput
@@ -164,8 +216,7 @@ export function Login() {
 
               <div>
                 <Label>senha</Label>
-                <SketchInput
-                  type="password"
+                <PasswordInputWithToggle
                   placeholder="••••••••"
                   value={password}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
@@ -174,7 +225,7 @@ export function Login() {
                 />
               </div>
 
-              <div className="text-right -mt-[4px]">
+              <div className="text-right -mt-1">
                 <button
                   type="button"
                   onClick={() => navigate("/forgot")}
@@ -185,7 +236,7 @@ export function Login() {
               </div>
 
               {/* Botão Entrar */}
-              <div className="mt-[6px] transition-all duration-200 hover:opacity-90 active:scale-[0.98] touch-manipulation">
+              <div className="mt-1 transition-all duration-200 hover:opacity-90 active:scale-[0.98] touch-manipulation">
                 <SketchButton seed={31} variant="primary" type="submit">
                   {loading ? "Entrando..." : "Entrar"}
                 </SketchButton>
@@ -207,11 +258,11 @@ export function Login() {
           </form>
         </FormBox>
 
-        {/* Botão de Voltar com toque de 44px garantido */}
+        {/* Botão de Voltar */}
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="mt-[20px] px-5 py-2.5 min-h-[44px] bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[18px] font-bold text-[#1a1208] flex items-center justify-center gap-[6px] hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] focus:bg-[#1a1208] focus:text-[#f7f3eb] transition-colors shadow-sm select-none touch-manipulation"
+          className="mt-4 px-5 py-2.5 min-h-[44px] bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[17px] font-bold text-[#1a1208] flex items-center justify-center gap-[6px] hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] focus:bg-[#1a1208] focus:text-[#f7f3eb] transition-colors shadow-sm select-none touch-manipulation"
         >
           voltar para o início
         </button>

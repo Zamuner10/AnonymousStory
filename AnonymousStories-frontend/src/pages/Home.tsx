@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import Background from "../components/Background";
 import { Header } from "../components/Header";
-import { useAuth } from "../contexts/AuthContext"; // 1. Importação do hook de autenticação
+import { useAuth } from "../contexts/AuthContext";
 
 function Doodles() {
   return (
@@ -149,13 +149,13 @@ function Doodles() {
 
 export function Home() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth(); // 2. Extração do estado de autenticação
+  const { isAuthenticated } = useAuth();
 
   return (
-    <div className="relative w-full h-screen overflow-hidden flex items-center justify-center bg-[#f7f3eb]">
-      {/* Renderiza o Header APENAS quando o usuário estiver logado */}
+    <div className="relative w-full min-h-[100dvh] overflow-y-auto py-6 pb-16 flex flex-col items-center justify-between bg-[#f7f3eb]">
+      {/* Header posicionado apenas se autenticado */}
       {isAuthenticated && (
-        <div className="absolute top-4 right-6 z-20">
+        <div className="absolute top-4 right-4 sm:right-6 z-20">
           <Header />
         </div>
       )}
@@ -163,13 +163,14 @@ export function Home() {
       <Background fadeStrength="medium" />
       <Doodles />
 
-      <div className="relative z-10 text-center px-6 flex flex-col items-center">
-        <span className="font-['Caveat'] text-base text-[#1a1208] text-[25px] tracking-wider mb-4 block">
+      {/* Bloco de conteúdo central com flexbox adaptativo */}
+      <div className="relative z-10 text-center px-4 sm:px-6 flex flex-col items-center my-auto w-full max-w-2xl pt-8 sm:pt-0">
+        <span className="font-['Caveat'] text-[20px] sm:text-[25px] text-[#1a1208] tracking-wider mb-2 sm:mb-4 block">
           um espaço para o que você carrega por dentro
         </span>
 
         <div className="relative mb-1">
-          <h1 className="font-['Caveat'] text-[clamp(64px,11vw,112px)] text-[#1a1208] font-bold leading-none tracking-tight m-0">
+          <h1 className="font-['Caveat'] text-[clamp(56px,10vw,112px)] text-[#1a1208] font-bold leading-none tracking-tight m-0">
             Histórias
           </h1>
           <svg className="block -mt-1 w-full h-[10px]" viewBox="0 0 400 10">
@@ -203,22 +204,24 @@ export function Home() {
           </svg>
         </div>
 
-        <h1 className="font-['Caveat'] text-[clamp(64px,11vw,112px)] text-[#b07030] font-bold leading-none tracking-tight m-0 mb-7">
+        <h1 className="font-['Caveat'] text-[clamp(56px,10vw,112px)] text-[#b07030] font-bold leading-none tracking-tight m-0 mb-4 sm:mb-7">
           Anônimas.
         </h1>
 
-        <p className="font-['Caveat'] text-[30px] text-[#1a1208] max-w-[420px] leading-[1.7] mb-9">
+        <p className="font-['Caveat'] text-[22px] sm:text-[30px] text-[#1a1208] max-w-[420px] leading-[1.4] sm:leading-[1.7] mb-6 sm:mb-9">
           Aqui você pode deixar sua história para qualquer um ler — seja ela de
           um amor, uma conquista ou uma perda. Sinta-se à vontade para deixar a
           sua marca.
         </p>
 
-        <div className="flex items-center gap-[14px]">
+        {/* Botões empilhados ou lado a lado com suporte touch */}
+        <div className="flex flex-row items-center justify-center gap-3 sm:gap-[14px] w-full max-w-[360px] pb-4">
           {/* Botão 1: Escrever uma carta */}
-          <div className="relative w-[194px] h-[50px] group transition-transform duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 hover:scale-[1.02]">
+          <div className="relative flex-1 h-[50px] group transition-transform duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 hover:scale-[1.02] touch-manipulation">
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
               viewBox="0 0 194 50"
+              preserveAspectRatio="none"
             >
               <defs>
                 <filter id="btn-sketch">
@@ -251,17 +254,18 @@ export function Home() {
             </svg>
             <button
               onClick={() => navigate(isAuthenticated ? "/write" : "/login")}
-              className="relative z-10 w-full h-full px-8 py-[13px] bg-transparent text-[#f7f3eb] group-hover:text-[#1a1208] font-['Caveat'] font-bold text-[19px] border-none cursor-pointer flex items-center justify-center transition-colors duration-200"
+              className="relative z-10 w-full h-full px-2 sm:px-6 py-[13px] bg-transparent text-[#f7f3eb] group-hover:text-[#1a1208] font-['Caveat'] font-bold text-[17px] sm:text-[19px] border-none cursor-pointer flex items-center justify-center transition-colors duration-200 whitespace-nowrap"
             >
               Escrever uma carta
             </button>
           </div>
 
           {/* Botão 2: Ler cartas */}
-          <div className="relative w-[130px] h-[50px] group transition-transform duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 hover:scale-[1.02]">
+          <div className="relative flex-1 h-[50px] group transition-transform duration-200 ease-out hover:-translate-y-0.5 active:translate-y-0 hover:scale-[1.02] touch-manipulation">
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
               viewBox="0 0 130 50"
+              preserveAspectRatio="none"
             >
               <defs>
                 <filter id="btn2-sketch">
@@ -294,7 +298,7 @@ export function Home() {
             </svg>
             <button
               onClick={() => navigate("/feed")}
-              className="relative z-10 w-full h-full px-6 py-[13px] bg-transparent text-[#f7f3eb] group-hover:text-[#1a1208] font-['Caveat'] font-semibold text-[19px] border-none cursor-pointer flex items-center justify-center transition-colors duration-200"
+              className="relative z-10 w-full h-full px-2 sm:px-4 py-[13px] bg-transparent text-[#f7f3eb] group-hover:text-[#1a1208] font-['Caveat'] font-semibold text-[17px] sm:text-[19px] border-none cursor-pointer flex items-center justify-center transition-colors duration-200 whitespace-nowrap"
             >
               Ler cartas
             </button>
@@ -302,9 +306,9 @@ export function Home() {
         </div>
       </div>
 
-      {/* Assinatura discreta do criador no canto inferior direito */}
-      <div className="absolute bottom-4 right-6 pointer-events-none z-10 select-none">
-        <span className="font-['Caveat'] text-lg text-[#1a1208]/35 tracking-widest font-medium">
+      {/* Assinatura do criador no canto inferior */}
+      <div className="relative sm:absolute bottom-2 sm:bottom-4 right-auto sm:right-6 pointer-events-none z-10 select-none mt-auto">
+        <span className="font-['Caveat'] text-base sm:text-lg text-[#1a1208]/35 tracking-widest font-medium">
           created by kz
         </span>
       </div>

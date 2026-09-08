@@ -1,3 +1,4 @@
+// src/pages/ReadLetters.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
@@ -22,7 +23,6 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
-// Hook leve para detectar telas pequenas mantendo o rigor das props numericas do SVG
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 640);
 
@@ -56,6 +56,7 @@ function ReadCard({
   return (
     <div
       onClick={story ? onClick : undefined}
+      className="touch-manipulation"
       style={{
         width: w,
         height: h,
@@ -67,7 +68,7 @@ function ReadCard({
       }}
       onMouseEnter={(e) => {
         if (story) {
-          (e.currentTarget as HTMLDivElement).style.transform = `rotate(${tilt}deg) scale(1.06)`;
+          (e.currentTarget as HTMLDivElement).style.transform = `rotate(${tilt}deg) scale(1.05)`;
         }
       }}
       onMouseLeave={(e) => {
@@ -96,7 +97,7 @@ function ReadCard({
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
               <div>
-                <p style={{ fontFamily: "Caveat, cursive", fontSize: isMobile ? 9.5 : 10.5, color: "#5a3a1a", opacity: 0.65, lineHeight: 1.2 }}>
+                <p style={{ fontFamily: "Caveat, cursive", fontSize: isMobile ? 10 : 11, color: "#5a3a1a", opacity: 0.7, lineHeight: 1.2 }}>
                   {story.authorDisplayName}
                 </p>
                 <p style={{ fontFamily: "Caveat, cursive", fontSize: isMobile ? 9.5 : 10.5, color: "#5a3a1a", opacity: 0.5 }}>
@@ -104,13 +105,13 @@ function ReadCard({
                 </p>
               </div>
             </div>
-            <p style={{ fontFamily: "Caveat, cursive", fontSize: isMobile ? 12.5 : 14, color: "#1a1208", fontWeight: 700, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <p style={{ fontFamily: "Caveat, cursive", fontSize: isMobile ? 13 : 15, color: "#1a1208", fontWeight: 700, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {story.title}
             </p>
             <p
               style={{
                 fontFamily: "Caveat, cursive",
-                fontSize: isMobile ? 11.5 : 13,
+                fontSize: isMobile ? 12 : 13.5,
                 color: "#3a2010",
                 lineHeight: 1.3,
                 overflow: "hidden",
@@ -195,7 +196,7 @@ function LetterModal({ story, onClose }: { story: Story; onClose: () => void }) 
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "rgba(26,18,8,0.45)",
+        background: "rgba(26,18,8,0.5)",
         backdropFilter: "blur(4px)",
         WebkitBackdropFilter: "blur(4px)",
         animation: "fadeIn 0.2s ease",
@@ -238,28 +239,30 @@ function LetterModal({ story, onClose }: { story: Story; onClose: () => void }) 
 
         <div style={{ position: "absolute", inset: 0, backgroundImage: "repeating-linear-gradient(transparent, transparent 27px, rgba(100,120,200,0.09) 27px, rgba(100,120,200,0.09) 28px)", backgroundPositionY: "80px", borderRadius: 4, pointerEvents: "none" }} />
 
-        <div className="p-4 sm:p-9" style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
+        <div className="p-4 sm:p-8" style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
             <div>
-              <p style={{ fontFamily: "Caveat, cursive", fontSize: 13, color: "#7a5a2a", opacity: 0.7 }}>História Anônima</p>
+              <p style={{ fontFamily: "Caveat, cursive", fontSize: 14, color: "#7a5a2a", opacity: 0.8 }}>História Anônima</p>
               <p style={{ fontFamily: "Caveat, cursive", fontSize: 13, color: "#7a5a2a", opacity: 0.6 }}>
                 {new Date(story.createdAt).toLocaleDateString("pt-BR")}
               </p>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", padding: 8, minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                  <defs>
-                    <filter id="x-sk">
-                      <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="2" result="n" />
-                      <feDisplacementMap in="SourceGraphic" in2="n" scale="2" xChannelSelector="R" yChannelSelector="G" />
-                    </filter>
-                  </defs>
-                  <line x1="4" y1="4" x2="18" y2="18" stroke="#1a1208" strokeWidth="2.2" strokeLinecap="round" filter="url(#x-sk)" opacity="0.6" />
-                  <line x1="18" y1="4" x2="4" y2="18" stroke="#1a1208" strokeWidth="2.2" strokeLinecap="round" filter="url(#x-sk)" opacity="0.6" />
-                </svg>
-              </button>
-            </div>
+            <button 
+              onClick={onClose} 
+              className="touch-manipulation"
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 8, minWidth: 44, minHeight: 44, display: "flex", alignItems: "center", justifyContent: "center" }}
+            >
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <defs>
+                  <filter id="x-sk">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="2" result="n" />
+                    <feDisplacementMap in="SourceGraphic" in2="n" scale="2" xChannelSelector="R" yChannelSelector="G" />
+                  </filter>
+                </defs>
+                <line x1="4" y1="4" x2="18" y2="18" stroke="#1a1208" strokeWidth="2.2" strokeLinecap="round" filter="url(#x-sk)" opacity="0.6" />
+                <line x1="18" y1="4" x2="4" y2="18" stroke="#1a1208" strokeWidth="2.2" strokeLinecap="round" filter="url(#x-sk)" opacity="0.6" />
+              </svg>
+            </button>
           </div>
 
           <svg width="100%" height="10" viewBox="0 0 448 10" style={{ display: "block", marginBottom: 14 }}>
@@ -272,11 +275,11 @@ function LetterModal({ story, onClose }: { story: Story; onClose: () => void }) 
             <line x1="0" y1="5" x2="448" y2="5" stroke="#1a1208" strokeWidth="1.5" opacity="0.15" filter="url(#mdiv)" />
           </svg>
 
-          <p style={{ fontFamily: "Caveat, cursive", fontSize: 22, fontWeight: 700, color: "#1a1208", marginBottom: 10 }}>
+          <p style={{ fontFamily: "Caveat, cursive", fontSize: 24, fontWeight: 700, color: "#1a1208", marginBottom: 10 }}>
             {story.title}
           </p>
 
-          <p style={{ fontFamily: "Caveat, cursive", fontSize: 18, color: "#1a1208", lineHeight: 1.6, marginBottom: 20, whiteSpace: "pre-wrap" }}>
+          <p style={{ fontFamily: "Caveat, cursive", fontSize: 19, color: "#1a1208", lineHeight: 1.6, marginBottom: 20, whiteSpace: "pre-wrap" }}>
             {story.content}
           </p>
 
@@ -288,7 +291,7 @@ function LetterModal({ story, onClose }: { story: Story; onClose: () => void }) 
             — {story.authorDisplayName}
           </p>
 
-          <p style={{ fontFamily: "Caveat, cursive", fontSize: 14, color: "#7a5a2a", textAlign: "center", marginTop: 18, opacity: 0.5 }}>
+          <p style={{ fontFamily: "Caveat, cursive", fontSize: 14, color: "#7a5a2a", textAlign: "center", marginTop: 18, opacity: 0.6 }}>
             clique fora para fechar ✦
           </p>
         </div>
@@ -380,7 +383,7 @@ export function ReadLetters() {
   });
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "100vh", overflow: "hidden", background: "#f7f3eb" }}>
+    <div style={{ position: "relative", width: "100%", minHeight: "100dvh", height: "100dvh", overflow: "hidden", background: "#f7f3eb" }}>
       <style>{`
         @keyframes marqueeLeft {
           0% { transform: translateX(0%); }
@@ -399,7 +402,9 @@ export function ReadLetters() {
           animation: marqueeRight 75s linear infinite;
         }
         .animate-marquee-slow-left:hover,
-        .animate-marquee-slow-right:hover {
+        .animate-marquee-slow-right:hover,
+        .animate-marquee-slow-left:active,
+        .animate-marquee-slow-right:active {
           animation-play-state: paused;
         }
       `}</style>
@@ -409,15 +414,17 @@ export function ReadLetters() {
         className="px-3 py-2.5 sm:px-7 sm:py-3.5"
         style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 30, display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(to bottom, rgba(247,243,235,0.96) 0%, transparent 100%)" }}
       >
-        {/* Logo responsiva */}
-        <span className="text-lg sm:text-2xl" style={{ fontFamily: "Caveat, cursive", fontWeight: 700, color: "#1a1208" }}>
-          Histórias <span style={{ color: "#b07030" }}>Anônimas</span>
-        </span>
+        <button
+          onClick={() => navigate("/")}
+          className="bg-transparent border-none cursor-pointer p-0 touch-manipulation flex items-center"
+        >
+          <span className="text-lg sm:text-2xl" style={{ fontFamily: "Caveat, cursive", fontWeight: 700, color: "#1a1208" }}>
+            Histórias <span style={{ color: "#b07030" }}>Anônimas</span>
+          </span>
+        </button>
 
-        {/* Lado Direito: Botão Escrever + Header (Ambos com mesmo formato SVG/Tamanho) */}
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {/* Botao Escrever uma carta */}
-          <div style={{ position: "relative" }}>
+          <div style={{ position: "relative" }} className="touch-manipulation">
             <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible", pointerEvents: "none" }}>
               <defs>
                 <filter id="tb-sk">
@@ -459,7 +466,6 @@ export function ReadLetters() {
             </button>
           </div>
 
-          {/* Componente Header */}
           <Header />
         </div>
       </div>
@@ -469,7 +475,7 @@ export function ReadLetters() {
       {/* Esteiras Infinitas */}
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "space-evenly", paddingBlock: 4, paddingTop: 52 }}>
         {ROWS_CONFIG.map((row, i) => (
-          <Row  
+          <Row   
             key={i}
             rowStories={rowsStories[i]}
             direction={row.dir}
