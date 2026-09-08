@@ -255,4 +255,18 @@ UserController {
                 "message", "Senha alterada com sucesso! Agora você pode acessar sua conta com a nova senha."
         ));
     }
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "O e-mail é obrigatório."));
+        }
+
+        userService.resendVerificationToken(email);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Se a conta existir e não estiver verificada, o e-mail foi reenviado com sucesso!"
+        ));
+    }
 }

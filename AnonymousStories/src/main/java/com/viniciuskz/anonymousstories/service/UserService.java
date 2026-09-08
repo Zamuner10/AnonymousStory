@@ -36,11 +36,9 @@ public class UserService {
             throw new IllegalArgumentException("The passwords don't match!");
         }
 
-
         validateEmailAlreadyExist(dto.email());
         validateName(dto.name());
         validatePassword(dto.password());
-
 
         User user = new User();
         user.setName(dto.name());
@@ -48,13 +46,13 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.password()));
         user.setAge(dto.age());
 
-
         String token = UUID.randomUUID().toString();
         user.setVerificationToken(token);
         user.setIsVerified(false);
 
-
         User savedUser = userRepository.save(user);
+
+        // Dispara o e-mail de verificação de cadastro
         emailService.sendVerificationEmail(savedUser.getEmail(), token);
 
         return savedUser;
@@ -72,6 +70,61 @@ public class UserService {
         return false;
     }
 
+    public void resendVerificationToken(String email) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            // Verifica se o usuário ainda não confirmou o cadastro
+            Boolean isVerified = user.getIsVerified();
+            if (isVerified == null || !isVerified) {
+                String token = UUID.randomUUID().toString();
+                user.setVerificationToken(token);
+
+                // Se a sua entidade possuir o campo tokenExpiration:
+                // user.setTokenExpiration(LocalDateTime.now().plusHours(24));
+
+                userRepository.save(user);
+
+                emailService.sendVerificationEmail(user.getEmail(), token);
+            }
+        }
+    }
+
+    @Transactional
+    public void processForgotPassword(ForgotPasswordRequestDTO dto) {
+        Optional<User> userOptional = userRepository.findByEmail(dto.email());
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            String token = UUID.randomUUID().toString();
+
+            user.setPasswordResetToken(token);
+            user.setPasswordResetTokenExpiry(LocalDateTime.now().plusMinutes(30));
+            userRepository.save(user);
+
+            String resetLink = frontendUrl + "/reset-password?token=" + token;
+            emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+        }
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequestDTO dto) {
+        User user = userRepository.findByPasswordResetToken(dto.token())
+                .orElseThrow(() -> new IllegalArgumentException("Token de redefinição de senha inválido ou inexistente."));
+
+        if (user.getPasswordResetTokenExpiry() == null || user.getPasswordResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("O link para redefinição de senha expirou. Solicite um novo link.");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.newPassword()));
+
+        user.setPasswordResetToken(null);
+        user.setPasswordResetTokenExpiry(null);
+
+        userRepository.save(user);
+    }
+
     private void validateEmailAlreadyExist(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent()) {
@@ -81,30 +134,30 @@ public class UserService {
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("The name cannot be empty.");
+            throw new IllegalArgumentException("Nome não pode ficar vazio.");
         }
 
         char firstLetter = name.charAt(0);
         if (!Character.isUpperCase(firstLetter)) {
-            throw new IllegalArgumentException("The first letter must be capitalized.");
+            throw new IllegalArgumentException("A primeira letra deve ser maiúscula");
         }
 
         for (int i = 0; i < name.length(); i++) {
             char ch = name.charAt(i);
 
             if (Character.isDigit(ch)) {
-                throw new IllegalArgumentException("The name cannot contain numbers.");
+                throw new IllegalArgumentException("O nome não pode conter números.");
             }
 
             if (!Character.isLetter(ch) && !Character.isWhitespace(ch)) {
-                throw new IllegalArgumentException("The name cannot contain special characters.");
+                throw new IllegalArgumentException("O nome não pode conter caracteres especiais");
             }
         }
     }
 
     private void validatePassword(String password) {
         if (password == null || password.isBlank()) {
-            throw new IllegalArgumentException("The password cannot be empty.");
+            throw new IllegalArgumentException("A senha não pode estar vazia.");
         }
 
         boolean hasLetter = false;
@@ -130,50 +183,16 @@ public class UserService {
         }
 
         if (!hasLetter) {
-            throw new IllegalArgumentException("Password must contain at least one letter.");
+            throw new IllegalArgumentException("A senha deve conter pelo menos uma letra");
         }
         if (!hasUpperCase) {
-            throw new IllegalArgumentException("Password must contain at least one uppercase letter.");
+            throw new IllegalArgumentException("A senha deve conter pelo menos uma letra maiúscula.");
         }
         if (!hasDigit) {
-            throw new IllegalArgumentException("Password must contain at least one number.");
+            throw new IllegalArgumentException("A senha deve conter pelo menos um número.");
         }
         if (!hasSpecialChar) {
-            throw new IllegalArgumentException("Password must contain at least one special character.");
+            throw new IllegalArgumentException("A senha deve conter pelo menos um caractere especial");
         }
-    }
-
-    @Transactional
-    public void processForgotPassword(ForgotPasswordRequestDTO dto) {
-        Optional<User> userOptional = userRepository.findByEmail(dto.email());
-
-        if(userOptional.isPresent()){
-            User user = userOptional.get();
-            String token = UUID.randomUUID().toString();
-
-            user.setPasswordResetToken(token);
-            user.setPasswordResetTokenExpiry(LocalDateTime.now().plusMinutes(30));
-            userRepository.save(user);
-
-            String resetLink = frontendUrl + "/reset-password?token=" + token;
-            emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
-        }
-    }
-
-    @Transactional
-    public void resetPassword(ResetPasswordRequestDTO dto) {
-        User user = userRepository.findByPasswordResetToken(dto.token())
-                .orElseThrow(() -> new IllegalArgumentException("Token de redefinição de senha inválido ou inexistente."));
-
-        if (user.getPasswordResetTokenExpiry() == null || user.getPasswordResetTokenExpiry().isBefore(LocalDateTime.now())){
-            throw  new IllegalArgumentException("O link para redefinição de senha expirou. Solicite um novo link");
-        }
-
-        user.setPassword(passwordEncoder.encode(dto.newPassword()));
-
-        user.setPasswordResetToken(null);
-        user.setPasswordResetTokenExpiry(null);
-
-        userRepository.save(user);
     }
 }
