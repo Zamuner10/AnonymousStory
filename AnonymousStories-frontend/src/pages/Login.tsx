@@ -9,7 +9,7 @@ import { useAuth } from "../contexts/AuthContext";
 
 function FormBox({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-[380px] max-w-[90vw]">
+    <div className="relative w-[380px] max-w-[92vw]">
       <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none">
         <defs>
           <filter id="form-sk">
@@ -42,8 +42,9 @@ function FormBox({ children }: { children: React.ReactNode }) {
         />
       </svg>
       {/* Margem vermelha de folha */}
-      <div className="absolute top-[10px] bottom-[10px] left-[52px] w-[1px] bg-[rgba(220,80,60,0.18)] z-10" />
-      <div className="relative z-20 px-[36px] pt-[36px] pb-[32px]">
+      <div className="absolute top-[10px] bottom-[10px] left-[36px] sm:left-[52px] w-[1px] bg-[rgba(220,80,60,0.18)] z-10" />
+      {/* Padding ajustado para mobile: px-5 py-6 no celular, px-[36px] em telas maiores */}
+      <div className="relative z-20 px-5 py-6 sm:px-[36px] sm:pt-[36px] sm:pb-[32px]">
         {children}
       </div>
     </div>
@@ -64,18 +65,8 @@ export function Login() {
     setLoading(true);
 
     try {
-      // MANTIDO CORRETO: POST /login (sem /auth)
       await api.post("/login", { email, password });
-
-      // CORREÇÃO: depois do login dar certo, o cookie já está salvo no
-      // navegador, mas o AuthContext ainda não sabe disso — ele só busca
-      // "quem está logado" uma vez, quando o app carrega. Sem chamar
-      // checkAuth() aqui e ESPERAR ele terminar (await), a tela /write
-      // (protegida) checa isAuthenticated antes do contexto atualizar,
-      // acha que ninguém está logado, e manda de volta pro /login — que
-      // era exatamente o bug: login "funcionava" mas voltava pro login.
       await checkAuth();
-
       navigate("/write");
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -89,7 +80,8 @@ export function Login() {
   };
 
   return (
-    <div className="relative w-full min-h-screen overflow-y-auto py-6 flex items-center justify-center bg-[#f7f3eb]">
+    /* Usando min-h-[100dvh] e pb-12 para garantir rolagens fluidas quando o teclado mobile abrir */
+    <div className="relative w-full min-h-[100dvh] overflow-y-auto py-8 pb-12 flex items-center justify-center bg-[#f7f3eb]">
       <Background fadeStrength="heavy" />
 
       {/* Ilustrações e Rabiscos nos cantos */}
@@ -115,13 +107,13 @@ export function Login() {
         <text x="130" y="560" fontSize="18" fill="#1a1208" opacity="0.1" filter="url(#d2)" fontFamily="serif">✦</text>
       </svg>
 
-      <div className="relative z-10 flex flex-col items-center my-auto">
+      <div className="relative z-10 flex flex-col items-center my-auto w-full px-2">
         {/* Logotipo */}
         <button
           onClick={() => navigate("/")}
-          className="bg-transparent border-none cursor-pointer mb-[28px] group touch-manipulation"
+          className="bg-transparent border-none cursor-pointer mb-[20px] sm:mb-[28px] group touch-manipulation min-h-[44px] flex items-center justify-center"
         >
-          <span className="font-['Caveat'] text-[28px] font-bold text-[#1a1208] tracking-tight group-hover:opacity-80 active:opacity-60 transition-opacity">
+          <span className="font-['Caveat'] text-[26px] sm:text-[28px] font-bold text-[#1a1208] tracking-tight group-hover:opacity-80 active:opacity-60 transition-opacity">
             Histórias <span className="text-[#b07030]">Anônimas</span>
           </span>
         </button>
@@ -129,7 +121,7 @@ export function Login() {
         <FormBox>
           <form onSubmit={handleSubmit}>
             {/* Cabeçalho */}
-            <div className="text-center mb-[28px]">
+            <div className="text-center mb-[20px] sm:mb-[28px]">
               <svg width="36" height="28" viewBox="0 0 36 28" fill="none" className="mb-[10px] opacity-55 mx-auto">
                 <defs>
                   <filter id="env-sk">
@@ -140,10 +132,10 @@ export function Login() {
                 <rect x="1" y="1" width="34" height="26" rx="2" stroke="#1a1208" strokeWidth="1.8" filter="url(#env-sk)" />
                 <polyline points="1,1 18,16 35,1" stroke="#1a1208" strokeWidth="1.8" fill="none" filter="url(#env-sk)" />
               </svg>
-              <h2 className="font-['Caveat'] text-[32px] font-bold text-[#1a1208] m-0 leading-none">
+              <h2 className="font-['Caveat'] text-[28px] sm:text-[32px] font-bold text-[#1a1208] m-0 leading-none">
                 Bem-vindo de volta
               </h2>
-              <p className="font-['Caveat'] text-[16px] text-[#7a5a2a] mt-[6px]">
+              <p className="font-['Caveat'] text-[15px] sm:text-[16px] text-[#7a5a2a] mt-[6px]">
                 entre para continuar sua história
               </p>
             </div>
@@ -182,17 +174,17 @@ export function Login() {
                 />
               </div>
 
-              <div className="text-right -mt-[6px]">
+              <div className="text-right -mt-[4px]">
                 <button
                   type="button"
                   onClick={() => navigate("/forgot")}
-                  className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[15px] text-[#b07030] hover:text-[#4169E1] active:text-[#4169E1] underline p-0 transition-colors touch-manipulation"
+                  className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[15px] text-[#b07030] hover:text-[#4169E1] active:text-[#4169E1] underline p-1 transition-colors touch-manipulation min-h-[36px] inline-flex items-center"
                 >
                   esqueci minha senha
                 </button>
               </div>
 
-              {/* Botão Entrar com estilo de hover e toque padronizados */}
+              {/* Botão Entrar */}
               <div className="mt-[6px] transition-all duration-200 hover:opacity-90 active:scale-[0.98] touch-manipulation">
                 <SketchButton seed={31} variant="primary" type="submit">
                   {loading ? "Entrando..." : "Entrar"}
@@ -206,7 +198,7 @@ export function Login() {
                 <button
                   type="button"
                   onClick={() => navigate("/register")}
-                  className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[16px] text-[#b07030] hover:text-[#4169E1] active:text-[#4169E1] underline p-0 transition-colors touch-manipulation"
+                  className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[16px] text-[#b07030] hover:text-[#4169E1] active:text-[#4169E1] underline py-1 px-1 transition-colors touch-manipulation inline-flex items-center"
                 >
                   criar conta
                 </button>
@@ -215,11 +207,11 @@ export function Login() {
           </form>
         </FormBox>
 
-        {/* Botão de Voltar para o início */}
+        {/* Botão de Voltar com toque de 44px garantido */}
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="mt-[20px] px-4 py-[6px] bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[18px] font-bold text-[#1a1208] flex items-center gap-[6px] hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] focus:bg-[#1a1208] focus:text-[#f7f3eb] transition-colors shadow-sm select-none touch-manipulation"
+          className="mt-[20px] px-5 py-2.5 min-h-[44px] bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[18px] font-bold text-[#1a1208] flex items-center justify-center gap-[6px] hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] focus:bg-[#1a1208] focus:text-[#f7f3eb] transition-colors shadow-sm select-none touch-manipulation"
         >
           voltar para o início
         </button>

@@ -67,17 +67,10 @@ export function CreateStory() {
 
   return (
     <div
+      className="w-full min-h-[100dvh] overflow-y-auto flex flex-col items-center justify-start p-4 sm:p-6"
       style={{
         position: "relative",
-        width: "100%",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
         background: "#f7f3eb",
-        overflow: "hidden",
-        padding: "24px 16px",
         boxSizing: "border-box",
       }}
     >
@@ -103,6 +96,7 @@ export function CreateStory() {
           border: "none",
           cursor: "pointer",
           marginBottom: 18,
+          marginTop: 12,
         }}
       >
         <span style={{ fontFamily: "Caveat, cursive", fontSize: 26, fontWeight: 700, color: "#1a1208" }}>
@@ -110,18 +104,16 @@ export function CreateStory() {
         </span>
       </button>
 
-      {/* A carta — mesmo molde visual do modal de leitura (LetterModal),
-          mas SEM a margem vermelha, e agora editável em vez de só
-          exibir texto. */}
+      {/* A carta — com maxWidth responsivo e sem trava rígida de altura para não estourar em telas pequenas */}
       <div
         style={{
           position: "relative",
           zIndex: 10,
           width: 560,
           maxWidth: "94vw",
-          maxHeight: "80vh",
           display: "flex",
           flexDirection: "column",
+          margin: "auto 0",
         }}
       >
         <svg
@@ -146,9 +138,7 @@ export function CreateStory() {
           />
         </svg>
 
-        {/* Linhas pautadas — SEM a margem vermelha (removida por pedido,
-            era uma barra vertical na cor "rgba(220,80,60,...)" que
-            existia aqui antes, do lado esquerdo do papel) */}
+        {/* Linhas pautadas */}
         <div
           style={{
             position: "absolute",
@@ -161,15 +151,15 @@ export function CreateStory() {
           }}
         />
 
+        {/* Conteúdo interno com padding dinâmico (p-4 no mobile, p-8 no desktop) */}
         <div
+          className="p-4 sm:p-8"
           style={{
             position: "relative",
             zIndex: 1,
-            padding: "32px 36px",
             display: "flex",
             flexDirection: "column",
             gap: 4,
-            overflowY: "auto",
           }}
         >
           {sent ? (
@@ -183,9 +173,7 @@ export function CreateStory() {
             </div>
           ) : (
             <>
-              {/* Cabeçalho: De / Data — clique em "De:" alterna entre
-                  Anônimo e o nome da conta, sem precisar de um botão
-                  separado quebrando a estética da carta */}
+              {/* Cabeçalho: De / Data */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
                 <button
                   type="button"
@@ -209,15 +197,12 @@ export function CreateStory() {
                 </span>
               </div>
 
-              {/* Para: — decorativo (igual ao Figma), não é um campo real */}
+              {/* Para: */}
               <p style={{ fontFamily: "Caveat, cursive", fontSize: 16, color: "#7a5a2a", opacity: 0.75, marginBottom: 10 }}>
                 Para: quem vai ler isso?
               </p>
 
-              {/* Assunto — o "título" que o backend exige (5 a 80
-                  caracteres), encaixado discretamente no cabeçalho da
-                  carta, já que o design do Figma não mostra um campo
-                  separado pra isso */}
+              {/* Assunto */}
               <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14, borderBottom: "1px dashed rgba(26,18,8,0.25)", paddingBottom: 6 }}>
                 <label style={{ fontFamily: "Caveat, cursive", fontSize: 15, color: "#7a5a2a", opacity: 0.75, whiteSpace: "nowrap" }}>
                   Assunto:
@@ -229,6 +214,8 @@ export function CreateStory() {
                   maxLength={MAX_TITLE}
                   style={{
                     flex: 1,
+                    width: "100%",
+                    minWidth: 0,
                     background: "transparent",
                     border: "none",
                     outline: "none",
@@ -242,15 +229,14 @@ export function CreateStory() {
                 </span>
               </div>
 
-              {/* Área de escrita — placeholder igual ao texto guia do
-                  Figma ("Escreva aqui a sua história...") */}
+              {/* Área de escrita */}
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value.slice(0, MAX_CONTENT))}
                 placeholder={"Escreva aqui a sua história...\n\nSeja ela de um amor, uma conquista ou uma perda.\nEsta carta será lida por alguém, um dia."}
                 style={{
                   flex: 1,
-                  minHeight: 220,
+                  minHeight: 180,
                   width: "100%",
                   background: "transparent",
                   border: "none",
@@ -263,8 +249,7 @@ export function CreateStory() {
                 }}
               />
 
-              {/* Contador com barra de progresso — igual ao "500
-                  restantes" do Figma */}
+              {/* Contador com barra de progresso */}
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6, marginBottom: 4 }}>
                 <div style={{ flex: 1, height: 3, background: "rgba(26,18,8,0.12)", borderRadius: 2, overflow: "hidden" }}>
                   <div
@@ -281,8 +266,7 @@ export function CreateStory() {
                 </span>
               </div>
 
-              {/* Assinatura — "com carinho, Anônimo(a)" do Figma, dinâmica
-                  de acordo com a escolha feita no "De:" acima */}
+              {/* Assinatura */}
               <p style={{ fontFamily: "Caveat, cursive", fontSize: 17, color: "#1a1208", fontWeight: 700, textAlign: "right", marginTop: 6, marginBottom: 4 }}>
                 — com carinho, {displayName}
               </p>
@@ -293,16 +277,14 @@ export function CreateStory() {
                 </p>
               )}
 
-              {/* Botões — trocados de borda reta pelo SketchButton
-                  compartilhado (mesma borda "de lápis" do resto do
-                  site, igual ao Home) */}
-              <div style={{ display: "flex", gap: 12, marginTop: 14 }}>
-                <div style={{ flex: 1, opacity: loading ? 0.5 : 1, pointerEvents: loading ? "none" : "auto" }}>
+              {/* Botões responsivos: flex-col no mobile (< 640px) e flex-row em telas maiores */}
+              <div className="flex flex-col sm:flex-row gap-3 mt-3 w-full">
+                <div className="w-full sm:flex-1" style={{ opacity: loading ? 0.5 : 1, pointerEvents: loading ? "none" : "auto" }}>
                   <SketchButton seed={71} variant="ghost" onClick={handleClear}>
                     Apagar
                   </SketchButton>
                 </div>
-                <div style={{ flex: 1, opacity: loading ? 0.7 : 1, pointerEvents: loading ? "none" : "auto" }}>
+                <div className="w-full sm:flex-1" style={{ opacity: loading ? 0.7 : 1, pointerEvents: loading ? "none" : "auto" }}>
                   <SketchButton seed={72} variant="primary" onClick={handleSubmit}>
                     {loading ? "Enviando..." : "Enviar carta ✉"}
                   </SketchButton>
@@ -313,7 +295,7 @@ export function CreateStory() {
         </div>
       </div>
 
-      {/* Voltar — igual ao "← voltar para o início" do Figma */}
+      {/* Voltar */}
       <button
         type="button"
         onClick={() => navigate("/feed")}
@@ -321,6 +303,7 @@ export function CreateStory() {
           position: "relative",
           zIndex: 10,
           marginTop: 18,
+          marginBottom: 12,
           background: "none",
           border: "none",
           cursor: "pointer",

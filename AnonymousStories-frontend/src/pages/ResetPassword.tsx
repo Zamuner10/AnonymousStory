@@ -62,26 +62,27 @@ export function ResetPassword() {
   };
 
   return (
-    <div className="relative w-full min-h-screen py-10 flex items-center justify-center bg-[#f7f3eb]">
+    /* Dynamic viewport com min-h-[100dvh], overflow-y-auto e pb-12 para rolagem fluida no celular */
+    <div className="relative w-full min-h-[100dvh] overflow-y-auto py-8 pb-12 flex items-center justify-center bg-[#f7f3eb]">
       <Background fadeStrength="heavy" />
 
-      <div className="relative z-10 w-full max-w-md px-4 flex flex-col items-center">
-        {/* Logotipo da Aplicação */}
+      <div className="relative z-10 w-full max-w-md px-4 flex flex-col items-center my-auto">
+        {/* Logotipo com área de toque mínima de 44px */}
         <button
           onClick={() => navigate("/")}
-          className="bg-transparent border-none cursor-pointer mb-6"
+          className="bg-transparent border-none cursor-pointer mb-6 group touch-manipulation min-h-[44px] flex items-center justify-center"
         >
-          <span className="font-['Caveat'] text-3xl font-bold text-[#1a1208] tracking-tight">
+          <span className="font-['Caveat'] text-2xl sm:text-3xl font-bold text-[#1a1208] tracking-tight group-hover:opacity-80 active:opacity-60 transition-opacity">
             Histórias <span className="text-[#b07030]">Anônimas</span>
           </span>
         </button>
 
-        {/* Card Sem Linha Vermelha */}
-        <div className="relative w-full bg-[#fffdfc]/95 border-2 border-[#1a1208] rounded-lg p-8 shadow-md">
-          <h2 className="font-['Caveat'] text-4xl font-bold text-[#1a1208] text-center mb-1">
+        {/* Card com padding adaptativo: p-5 no mobile e p-8 no desktop */}
+        <div className="relative w-full bg-[#fffdfc]/95 border-2 border-[#1a1208] rounded-lg p-5 sm:p-8 shadow-md">
+          <h2 className="font-['Caveat'] text-3xl sm:text-4xl font-bold text-[#1a1208] text-center mb-1">
             Nova Senha
           </h2>
-          <p className="font-['Caveat'] text-lg text-[#7a5a2a] text-center mb-4">
+          <p className="font-['Caveat'] text-base sm:text-lg text-[#7a5a2a] text-center mb-4">
             Escolha uma nova senha para a sua conta
           </p>
 
@@ -89,20 +90,20 @@ export function ResetPassword() {
 
           {/* Feedback de Sucesso */}
           {successMessage && (
-            <div className="my-4 p-4 bg-green-100 border border-green-400 text-green-900 rounded font-['Caveat'] text-xl text-center">
+            <div className="my-4 p-4 bg-green-100 border border-green-400 text-green-900 rounded font-['Caveat'] text-lg sm:text-xl text-center">
               {successMessage} Redirecionando para o login...
             </div>
           )}
 
           {/* Feedback de Erro */}
           {error && (
-            <div className="my-4 p-3 bg-red-100 border border-red-400 text-red-800 rounded font-['Caveat'] text-xl text-center">
+            <div className="my-4 p-3 bg-red-100 border border-red-400 text-red-800 rounded font-['Caveat'] text-lg sm:text-xl text-center">
               {error}
             </div>
           )}
 
           {!successMessage && (
-            <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-5">
+            <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4 sm:gap-5">
               <div>
                 <Label>Nova Senha</Label>
                 <SketchInput
@@ -111,6 +112,7 @@ export function ResetPassword() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   seed={18}
+                  autoComplete="new-password"
                 />
               </div>
 
@@ -122,10 +124,11 @@ export function ResetPassword() {
                   value={confirmNewPassword}
                   onChange={(e) => setConfirmNewPassword(e.target.value)}
                   seed={24}
+                  autoComplete="new-password"
                 />
               </div>
 
-              <div className="mt-2">
+              <div className="mt-2 transition-all duration-200 hover:opacity-90 active:scale-[0.98] touch-manipulation">
                 <SketchButton seed={35} variant="primary" type="submit">
                   {loading ? "Redefinindo..." : "Redefinir Senha"}
                 </SketchButton>

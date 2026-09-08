@@ -23,17 +23,6 @@ export function SketchInput({
 
   return (
     <div style={{ position: 'relative', width: '100%' }} className={wrapperClass}>
-      {/*
-        Correção do fundo cinza ao digitar: o navegador (Chrome/Edge) pinta
-        o campo com uma cor própria quando reconhece um valor salvo
-        (autofill de e-mail/senha) — isso NÃO é controlável via a
-        propriedade "background" normal, só via esse truque de
-        "box-shadow inset" gigante, que engana o navegador fazendo ele
-        pensar que já pintou o fundo (com a nossa cor de papel), então ele
-        não aplica o cinza/amarelo dele por cima.
-        color-scheme: light garante que o campo sempre use aparência clara,
-        mesmo se o sistema operacional da pessoa estiver no modo escuro.
-      */}
       <style>{`
         .${wrapperClass} input {
           color-scheme: light;
@@ -97,6 +86,7 @@ export function SketchInput({
           position: 'relative',
           zIndex: 2,
           width: '100%',
+          minHeight: 44, // Garantia obrigatoria de toque mobile (44px)
           padding: '10px 14px',
           background: 'transparent',
           border: 'none',
@@ -131,9 +121,6 @@ export function SketchButton({
   const wrapperClass = `sketch-btn-${seed}`;
   const isPrimary = variant === 'primary';
 
-  // Cores base (estado normal) e cores de hover — invertidas, igual ao
-  // padrão que já existe nos botões do Home.tsx (fundo escuro que vira
-  // claro no hover, texto que vira escuro).
   const baseFill = isPrimary ? '#1a1208' : 'transparent';
   const hoverFill = isPrimary ? '#f7f3eb' : '#1a1208';
   const baseText = isPrimary ? '#f7f3eb' : '#1a1208';
@@ -141,12 +128,6 @@ export function SketchButton({
 
   return (
     <div style={{ position: 'relative', width: '100%' }} className={wrapperClass}>
-      {/*
-        O hover precisa ser feito via CSS (pseudo-classe :hover), porque
-        estilo inline do React não tem suporte a isso. Usamos uma classe
-        única por botão (baseada no "seed") pra esse hover não vazar pra
-        outros botões da mesma tela sem querer.
-      */}
       <style>{`
         .${wrapperClass} rect {
           transition: fill 0.2s ease;
@@ -208,7 +189,9 @@ export function SketchButton({
           position: 'relative',
           zIndex: 2,
           width: '100%',
-          padding: '12px 20px',
+          minHeight: 44, // Garantia obrigatoria de toque mobile (44px)
+          minWidth: 44,
+          padding: '10px 16px',
           background: 'transparent',
           border: 'none',
           outline: 'none',
@@ -217,6 +200,10 @@ export function SketchButton({
           fontSize: 20,
           fontWeight: 700,
           color: baseText,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxSizing: 'border-box',
         }}
       >
         {children}

@@ -8,7 +8,7 @@ import { api } from "../services/api";
 
 function FormBox({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-[380px] max-w-[90vw]">
+    <div className="relative w-[380px] max-w-[92vw]">
       <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none">
         <defs>
           <filter id="form-sk-r">
@@ -29,8 +29,9 @@ function FormBox({ children }: { children: React.ReactNode }) {
         />
       </svg>
       {/* Margem vermelha de folha de caderno */}
-      <div className="absolute top-[10px] bottom-[10px] left-[45px] w-[1px] bg-[rgba(220,80,60,0.18)] z-10" />
-      <div className="relative z-20 px-[24px] sm:px-[30px] pt-[20px] pb-[18px]">
+      <div className="absolute top-[10px] bottom-[10px] left-[36px] sm:left-[45px] w-[1px] bg-[rgba(220,80,60,0.18)] z-10" />
+      {/* Padding responsivo: px-4 py-5 no mobile, px-[30px] em telas maiores */}
+      <div className="relative z-20 px-4 py-5 sm:px-[30px] sm:pt-[20px] sm:pb-[18px]">
         {children}
       </div>
     </div>
@@ -93,7 +94,8 @@ export function Register() {
   };
 
   return (
-    <div className="relative w-full min-h-screen overflow-y-auto py-6 flex items-center justify-center bg-[#f7f3eb]">
+    /* Usando min-h-[100dvh] com pb-12 para rolagem garantida com o teclado virtual do celular aberto */
+    <div className="relative w-full min-h-[100dvh] overflow-y-auto py-6 pb-12 flex items-center justify-center bg-[#f7f3eb]">
       <Background fadeStrength="heavy" />
 
       {/* Doodles decorativos nos cantos */}
@@ -117,13 +119,13 @@ export function Register() {
         <path d="M 1068 350 Q 1080 345 1116 350 Q 1128 345 1140 350" stroke="#1a1208" strokeWidth="1.5" fill="none" opacity="0.1" filter="url(#d3)" strokeLinecap="round"/>
       </svg>
 
-      <div className="relative z-10 flex flex-col items-center my-auto">
+      <div className="relative z-10 flex flex-col items-center my-auto w-full px-2">
         {/* Logo superior */}
         <button 
           onClick={() => navigate("/")} 
-          className="bg-transparent border-none cursor-pointer mb-2 group touch-manipulation"
+          className="bg-transparent border-none cursor-pointer mb-2 group touch-manipulation min-h-[44px] flex items-center justify-center"
         >
-          <span className="font-['Caveat'] text-[26px] font-bold text-[#1a1208] group-hover:opacity-80 active:opacity-60 transition-opacity">
+          <span className="font-['Caveat'] text-[24px] sm:text-[26px] font-bold text-[#1a1208] group-hover:opacity-80 active:opacity-60 transition-opacity">
             Histórias <span className="text-[#b07030]">Anônimas</span>
           </span>
         </button>
@@ -142,10 +144,10 @@ export function Register() {
               <path d="M 16 2 C 6 2 2 10 4 18 C 6 26 14 30 16 38" stroke="#1a1208" strokeWidth="1.8" fill="none" strokeLinecap="round" filter="url(#quill-sk)"/>
               <line x1="16" y1="8" x2="16" y2="38" stroke="#1a1208" strokeWidth="1.2" strokeLinecap="round" filter="url(#quill-sk)" opacity="0.5"/>
             </svg>
-            <h2 className="font-['Caveat'] text-[26px] font-bold text-[#1a1208] m-0 leading-none">
+            <h2 className="font-['Caveat'] text-[24px] sm:text-[26px] font-bold text-[#1a1208] m-0 leading-none">
               Criar sua conta
             </h2>
-            <p className="font-['Caveat'] text-[18px] text-[#7a5a2a] mt-1">
+            <p className="font-['Caveat'] text-[16px] sm:text-[18px] text-[#7a5a2a] mt-1">
               e comece a deixar sua marca
             </p>
           </div>
@@ -228,7 +230,7 @@ export function Register() {
                 />
               </div>
 
-              <p className="font-['Caveat'] text-[18px] text-[#5a4020] text-center leading-[1.2] mt-1">
+              <p className="font-['Caveat'] text-[16px] sm:text-[18px] text-[#5a4020] text-center leading-[1.2] mt-1">
                 ao criar uma conta você concorda em compartilhar
                 suas histórias de forma anônima e respeitosa
               </p>
@@ -243,11 +245,11 @@ export function Register() {
               <SketchDivider seed={18} />
 
               <div className="text-center">
-                <span className="font-['Caveat'] text-[20px] text-[#5a4020]">já tem uma conta?{" "}</span>
+                <span className="font-['Caveat'] text-[18px] sm:text-[20px] text-[#5a4020]">já tem uma conta?{" "}</span>
                 <button 
                   type="button" 
                   onClick={() => navigate("/login")} 
-                  className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[20px] text-[#b07030] hover:text-[#4169E1] active:text-[#4169E1] underline p-0 transition-colors touch-manipulation"
+                  className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[18px] sm:text-[20px] text-[#b07030] hover:text-[#4169E1] active:text-[#4169E1] underline py-1 px-1 transition-colors touch-manipulation inline-flex items-center"
                 >
                   entrar
                 </button>
@@ -256,11 +258,11 @@ export function Register() {
           )}
         </FormBox>
 
-        {/* Botão de Voltar para o início */}
+        {/* Botão de Voltar para o início com área de toque mínima de 44px */}
         <button 
           type="button" 
           onClick={() => navigate("/")} 
-          className="mt-3 px-4 py-[5px] bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[17px] font-bold text-[#1a1208] flex items-center gap-[6px] hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] focus:bg-[#1a1208] focus:text-[#f7f3eb] transition-colors shadow-sm select-none touch-manipulation"
+          className="mt-3 px-5 py-2.5 min-h-[44px] bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[17px] font-bold text-[#1a1208] flex items-center justify-center gap-[6px] hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] focus:bg-[#1a1208] focus:text-[#f7f3eb] transition-colors shadow-sm select-none touch-manipulation"
         >
           voltar para o início
         </button>
