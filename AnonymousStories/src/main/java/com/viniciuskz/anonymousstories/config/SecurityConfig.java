@@ -90,6 +90,7 @@ public class SecurityConfig {
 
         // Aceita o React local (5173/3000) e qualquer outra origem durante o desenvolvimento
         configuration.setAllowedOrigins(List.of(
+                "https://historiasanonimas.vercel.app",
                 "http://localhost:5173",
                 "http://localhost:3000"));
 
