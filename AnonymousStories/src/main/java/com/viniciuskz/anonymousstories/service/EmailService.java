@@ -1,43 +1,37 @@
 package com.viniciuskz.anonymousstories.service;
 
-
-import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-//import jakarta.mail.MessagingException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
-
     @Value("${app.base-url}")
     private String baseUrl;
 
-    @Value("${spring.mail.username}")
+    @Value("${resend.api.key}")
+    private String apiKey;
+
+    @Value("${resend.from.email:onboarding@resend.dev}")
     private String mailFrom;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    private final RestTemplate restTemplate;
+
+    public EmailService() {
+        this.restTemplate = new RestTemplate();
     }
 
     @Async
     public void sendVerificationEmail(String toEmail, String token) {
         String confirmationUrl = baseUrl + "/users/verify?token=" + token;
 
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(mailFrom);
-            helper.setTo(toEmail);
-            helper.setSubject("Ative sua conta - Histórias Anônimas");
-
-            String htmlContent = """
+        String htmlContent = """
     <!DOCTYPE html>
     <html>
     <head>
@@ -92,61 +86,67 @@ public class EmailService {
     </html>
     """.formatted(confirmationUrl, confirmationUrl, confirmationUrl);
 
-            helper.setText(htmlContent, true);
-            mailSender.send(message);
-
-            System.out.println(">>> E-MAIL DE ATIVAÇÃO ENVIADO COM SUCESSO PARA: " + toEmail);
-
-        } catch (Exception e) {
-            System.err.println(">>> ERRO CRÍTICO NO DISPARO DE E-MAIL SMTP PARA " + toEmail + ": " + e.getMessage());
-            e.printStackTrace();
-        }
+        executeResendSend(toEmail, "Ative sua conta - Histórias Anônimas", htmlContent);
     }
 
     @Async
     public void sendPasswordResetEmail(String toEmail, String resetLink) {
+        String htmlContent = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+                    <style>
+                        body { font-family: 'Caveat', cursive, sans-serif; background-color: #f7f3eb; color: #1a1208; margin: 0; padding: 20px; }
+                        .card { background-color: #fffdfc; border: 2.5px solid #1a1208; border-radius: 8px; max-width: 500px; margin: 0 auto; padding: 30px; text-align: center; }
+                        .title { font-size: 30px; font-weight: bold; color: #1a1208; margin-bottom: 10px; }
+                        .highlight { color: #b07030; }
+                        .text { font-size: 20px; color: #1a1208; margin-bottom: 25px; line-height: 1.5; font-weight: 600; }
+                        .btn { display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 12px 26px; font-size: 20px; font-weight: bold; border-radius: 6px; border: 2.5px solid #1a1208; }
+                    </style>
+                </head>
+                <body>
+                    <div class="card">
+                        <div class="title">Histórias <span class="highlight">Anônimas</span></div>
+                        <p class="text">Recebemos uma solicitação para redefinir a senha da sua conta.</p>
+                        <p class="text">Clique no botão abaixo para escolher uma nova senha. Este link expira em <strong>30 minutos</strong>.</p>
+                        <a href="%s" class="btn">Redefinir Minha Senha</a>
+                        <p class="text" style="font-size: 16px; margin-top: 30px; color: #5a4020;">Se você não solicitou a redefinição, apenas ignore este e-mail.</p>
+                    </div>
+                </body>
+                </html>
+                """.formatted(resetLink);
+
+        executeResendSend(toEmail, "Redefinição de Senha - Histórias Anônimas", htmlContent);
+    }
+
+    private void executeResendSend(String toEmail, String subject, String htmlBody) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            String url = "https://api.resend.com/emails";
 
-            helper.setFrom(mailFrom);
-            helper.setTo(toEmail);
-            helper.setSubject("Redefinição de Senha - Histórias Anônimas");
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("from", "Histórias Anônimas <" + mailFrom + ">");
+            payload.put("to", new String[]{toEmail});
+            payload.put("subject", subject);
+            payload.put("html", htmlBody);
 
-            String htmlContent = """
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="UTF-8">
-                        <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&display=swap" rel="stylesheet">
-                        <style>
-                            body { font-family: 'Caveat', cursive, sans-serif; background-color: #f7f3eb; color: #1a1208; margin: 0; padding: 20px; }
-                            .card { background-color: #fffdfc; border: 2.5px solid #1a1208; border-radius: 8px; max-width: 500px; margin: 0 auto; padding: 30px; text-align: center; }
-                            .title { font-size: 30px; font-weight: bold; color: #1a1208; margin-bottom: 10px; }
-                            .highlight { color: #b07030; }
-                            .text { font-size: 20px; color: #1a1208; margin-bottom: 25px; line-height: 1.5; font-weight: 600; }
-                            .btn { display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; padding: 12px 26px; font-size: 20px; font-weight: bold; border-radius: 6px; border: 2.5px solid #1a1208; }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="card">
-                            <div class="title">Histórias <span class="highlight">Anônimas</span></div>
-                            <p class="text">Recebemos uma solicitação para redefinir a senha da sua conta.</p>
-                            <p class="text">Clique no botão abaixo para escolher uma nova senha. Este link expira em <strong>30 minutos</strong>.</p>
-                            <a href="%s" class="btn">Redefinir Minha Senha</a>
-                            <p class="text" style="font-size: 16px; margin-top: 30px; color: #5a4020;">Se você não solicitou a redefinição, apenas ignore este e-mail.</p>
-                        </div>
-                    </body>
-                    </html>
-                    """.formatted(resetLink);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(apiKey);
 
-            helper.setText(htmlContent, true);
-            mailSender.send(message);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
 
-            System.out.println(">>> E-MAIL DE REDEFINIÇÃO ENVIADO COM SUCESSO PARA: " + toEmail);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                System.out.println(">>> E-MAIL ENVIADO COM SUCESSO VIA RESEND PARA: " + toEmail);
+            } else {
+                System.err.println(">>> FALHA NO DISPARO VIA RESEND PARA " + toEmail + ". Status: " + response.getStatusCode());
+            }
 
         } catch (Exception e) {
-            System.err.println(">>> ERRO CRÍTICO AO ENVIAR REDEFINIÇÃO PARA " + toEmail + ": " + e.getMessage());
+            System.err.println(">>> ERRO CRÍTICO NO DISPARO DE E-MAIL RESEND PARA " + toEmail + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
