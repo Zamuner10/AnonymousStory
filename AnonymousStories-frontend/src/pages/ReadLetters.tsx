@@ -316,26 +316,15 @@ export function ReadLetters() {
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Story | null>(null);
 
-  const handleIncomingStories = (incoming: Story[]) => {
-    setDisplayStories((prev) => {
-      let updatedList: Story[];
+const handleIncomingStories = (incoming: Story[]) => {
+  setDisplayStories((prev) => {
+    // Se não tinha nada carregado, cria a lista inicial (fixando a história 1 e embaralhando o resto)
+    if (prev.length === 0) {
+      const fixedStory1 = incoming.find((s) => s.id === 1);
+      const remaining = incoming.filter((s) => s.id !== 1);
+      const shuffledRemaining = shuffleArray(remaining);
 
-      if (prev.length === 0) {
-        const fixedStory1 = incoming.find((s) => s.id === 1);
-        const remaining = incoming.filter((s) => s.id !== 1);
-        const shuffledRemaining = shuffleArray(remaining);
-
-        updatedList = fixedStory1 ? [fixedStory1, ...shuffledRemaining] : shuffledRemaining;
-      } else {
-        const existingIds = new Set(prev.map((s) => s.id));
-        const newStories = incoming.filter((s) => !existingIds.has(s.id));
-
-        if (newStories.length === 0) {
-          return prev;
-        }
-
-        updatedList = [...prev, ...newStories];
-      }
+      const updatedList = fixedStory1 ? [fixedStory1, ...shuffledRemaining] : shuffledRemaining;
 
       try {
         localStorage.setItem("anonymous_stories_cache", JSON.stringify(updatedList));
@@ -344,8 +333,36 @@ export function ReadLetters() {
       }
 
       return updatedList;
-    });
-  };
+    }
+
+    // Mapeia os IDs recebidos do backend
+    const incomingIds = new Set(incoming.map((s) => s.id));
+
+    // 1. Remove cartas do estado local que foram excluídas no banco de dados
+    const filteredPrev = prev.filter((s) => incomingIds.has(s.id));
+
+    // 2. Identifica se há histórias realmente novas enviadas pelo backend
+    const existingIds = new Set(filteredPrev.map((s) => s.id));
+    const newStories = incoming.filter((s) => !existingIds.has(s.id));
+
+    // Se nenhuma carta foi deletada e nenhuma carta nova entrou, mantém o estado
+    if (newStories.length === 0 && filteredPrev.length === prev.length) {
+      return prev;
+    }
+
+    // Combina as cartas mantidas com as novas
+    const updatedList = [...filteredPrev, ...newStories];
+
+    // Atualiza o localStorage com a lista synronizada com o servidor
+    try {
+      localStorage.setItem("anonymous_stories_cache", JSON.stringify(updatedList));
+    } catch (err) {
+      console.error("Erro ao salvar cache local:", err);
+    }
+
+    return updatedList;
+  });
+};
 
   useEffect(() => {
     let isFirstLoad = displayStories.length === 0;

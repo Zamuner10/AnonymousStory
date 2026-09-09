@@ -26,11 +26,11 @@ import java.util.List;
 public class SecurityConfig {
 
     @Value("${app.cors.allowed-origins}")
-    private List<String> setAllowedOrigins;
+    private List <String> setAllowedOrigins;
 
     private final CustomUserDetailsService customUserDetailsService;
 
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService) {
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService){
         this.customUserDetailsService = customUserDetailsService;
     }
 
@@ -39,6 +39,14 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    // NOVO: sem isso, o Spring Security devolve 403 (não 401) pra QUALQUER
+    // requisição sem autenticação, mesmo em rotas que exigem login — é o
+    // comportamento padrão dele quando não existe formLogin()/httpBasic()
+    // configurado. Esse bean corrige isso: agora "sem credencial nenhuma"
+    // sempre devolve 401, que é o correto pela convenção REST (401 = não
+    // autenticado; 403 fica reservado pra quando a pessoa ESTÁ autenticada
+    // mas não tem permissão pra aquela ação específica — como já acontece
+    // no seu AccessDeniedException de Story, por exemplo).
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
         return (request, response, authException) ->
@@ -54,28 +62,22 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint()))
                 .authorizeHttpRequests(authorize -> authorize
-                        // Libera requisições Preflight (OPTIONS) para o navegador validar o CORS
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        
-                        // Rotas públicas
-                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/forgot-password").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/reset-password").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users/resend-verification").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users/verify").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/stories/**").permitAll()
-                        
-                        // Documentação Swagger
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/swagger-resources/**",
-                                "/webjars/**"
-                        ).permitAll()
-                        
-                        .anyRequest().authenticated()
+                                .requestMatchers(HttpMethod.POST, "/login").permitAll()
+//                              .requestMatchers(HttpMethod.POST, "/logout").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/users/forgot-password").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/users/reset-password").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/users/resend-verification").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/users/verify").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/stories/**").permitAll()
+                                .requestMatchers(
+                                        "/v3/api-docs/**",
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/swagger-resources/**",
+                                        "/webjars/**"
+                                ).permitAll()
+                                .anyRequest().authenticated()
                 )
                 .logout(logout -> logout.disable())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
@@ -84,24 +86,20 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Utiliza a variável injetada pelo @Value do application.properties / Render
-        // Se a lista vier vazia por algum motivo, usa a Vercel/localhost como fallback
-        if (setAllowedOrigins != null && !setAllowedOrigins.isEmpty()) {
-            configuration.setAllowedOrigins(setAllowedOrigins);
-        } else {
-            configuration.setAllowedOrigins(List.of(
-                    "https://historiasanonimas.vercel.app",
-                    "http://localhost:5173",
-                    "http://localhost:3000"
-            ));
-        }
+        // Aceita o React local (5173/3000) e qualquer outra origem durante o desenvolvimento
+        configuration.setAllowedOrigins(List.of(
+                "https://historiasanonimas.vercel.app",
+                "http://localhost:5173",
+                "http://localhost:3000"));
 
+        // Libera todos os cabeçalhos para o Swagger e ferramentas REST não serem bloqueados
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        // Permite o envio de Cookies (jwtToken) entre origens
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Set-Cookie", "Authorization"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -113,11 +111,13 @@ public class SecurityConfig {
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(customUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
+
         return provider;
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
+    public  AuthenticationManager authenticationManager(AuthenticationConfiguration config){
+
         return config.getAuthenticationManager();
     }
 }
