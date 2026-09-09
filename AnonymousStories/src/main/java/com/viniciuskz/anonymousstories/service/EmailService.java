@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -15,10 +16,10 @@ public class EmailService {
     @Value("${app.base-url}")
     private String baseUrl;
 
-    @Value("${resend.api.key}")
+    @Value("${brevo.api.key}")
     private String apiKey;
 
-    @Value("${resend.from.email:onboarding@resend.dev}")
+    @Value("${brevo.from.email}")
     private String mailFrom;
 
     private final RestTemplate restTemplate;
@@ -86,7 +87,7 @@ public class EmailService {
     </html>
     """.formatted(confirmationUrl, confirmationUrl, confirmationUrl);
 
-        executeResendSend(toEmail, "Ative sua conta - Histórias Anônimas", htmlContent);
+        executeBrevoSend(toEmail, "Ative sua conta - Histórias Anônimas", htmlContent);
     }
 
     @Async
@@ -118,35 +119,45 @@ public class EmailService {
                 </html>
                 """.formatted(resetLink);
 
-        executeResendSend(toEmail, "Redefinição de Senha - Histórias Anônimas", htmlContent);
+        executeBrevoSend(toEmail, "Redefinição de Senha - Histórias Anônimas", htmlContent);
     }
 
-    private void executeResendSend(String toEmail, String subject, String htmlBody) {
+    private void executeBrevoSend(String toEmail, String subject, String htmlBody) {
         try {
-            String url = "https://api.resend.com/emails";
+            String url = "https://api.brevo.com/v3/smtp/email";
 
             Map<String, Object> payload = new HashMap<>();
-            payload.put("from", "Histórias Anônimas <" + mailFrom + ">");
-            payload.put("to", new String[]{toEmail});
+
+            // Remetente
+            Map<String, String> sender = new HashMap<>();
+            sender.put("name", "Histórias Anônimas");
+            sender.put("email", mailFrom);
+            payload.put("sender", sender);
+
+            // Destinatário
+            Map<String, String> to = new HashMap<>();
+            to.put("email", toEmail);
+            payload.put("to", List.of(to));
+
             payload.put("subject", subject);
-            payload.put("html", htmlBody);
+            payload.put("htmlContent", htmlBody);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(apiKey);
+            headers.set("api-key", apiKey);
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
 
             ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                System.out.println(">>> E-MAIL ENVIADO COM SUCESSO VIA RESEND PARA: " + toEmail);
+                System.out.println(">>> E-MAIL ENVIADO COM SUCESSO VIA BREVO PARA: " + toEmail);
             } else {
-                System.err.println(">>> FALHA NO DISPARO VIA RESEND PARA " + toEmail + ". Status: " + response.getStatusCode());
+                System.err.println(">>> FALHA NO DISPARO VIA BREVO PARA " + toEmail + ". Status: " + response.getStatusCode());
             }
 
         } catch (Exception e) {
-            System.err.println(">>> ERRO CRÍTICO NO DISPARO DE E-MAIL RESEND PARA " + toEmail + ": " + e.getMessage());
+            System.err.println(">>> ERRO CRÍTICO NO DISPARO DE E-MAIL BREVO PARA " + toEmail + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
