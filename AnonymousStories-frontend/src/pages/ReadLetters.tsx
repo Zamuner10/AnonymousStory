@@ -316,15 +316,26 @@ export function ReadLetters() {
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Story | null>(null);
 
-const handleIncomingStories = (incoming: Story[]) => {
-  setDisplayStories((prev) => {
-    // Se não tinha nada carregado, cria a lista inicial
-    if (prev.length === 0) {
-      const fixedStory1 = incoming.find((s) => s.id === 1);
-      const remaining = incoming.filter((s) => s.id !== 1);
-      const shuffledRemaining = shuffleArray(remaining);
+  const handleIncomingStories = (incoming: Story[]) => {
+    setDisplayStories((prev) => {
+      let updatedList: Story[];
 
-      const updatedList = fixedStory1 ? [fixedStory1, ...shuffledRemaining] : shuffledRemaining;
+      if (prev.length === 0) {
+        const fixedStory1 = incoming.find((s) => s.id === 1);
+        const remaining = incoming.filter((s) => s.id !== 1);
+        const shuffledRemaining = shuffleArray(remaining);
+
+        updatedList = fixedStory1 ? [fixedStory1, ...shuffledRemaining] : shuffledRemaining;
+      } else {
+        const existingIds = new Set(prev.map((s) => s.id));
+        const newStories = incoming.filter((s) => !existingIds.has(s.id));
+
+        if (newStories.length === 0) {
+          return prev;
+        }
+
+        updatedList = [...prev, ...newStories];
+      }
 
       try {
         localStorage.setItem("anonymous_stories_cache", JSON.stringify(updatedList));
@@ -333,34 +344,8 @@ const handleIncomingStories = (incoming: Story[]) => {
       }
 
       return updatedList;
-    }
-
-    // 1. Mapeia os IDs vindos do banco Neon
-    const incomingIds = new Set(incoming.map((s) => s.id));
-
-    // 2. REMOVE do celular/PC as cartas que foram deletadas do banco
-    const filteredPrev = prev.filter((s) => incomingIds.has(s.id));
-
-    // 3. Adiciona cartas novas (se houver)
-    const existingIds = new Set(filteredPrev.map((s) => s.id));
-    const newStories = incoming.filter((s) => !existingIds.has(s.id));
-
-    if (newStories.length === 0 && filteredPrev.length === prev.length) {
-      return prev;
-    }
-
-    const updatedList = [...filteredPrev, ...newStories];
-
-    // 4. Atualiza o armazenamento local do celular com a lista limpa
-    try {
-      localStorage.setItem("anonymous_stories_cache", JSON.stringify(updatedList));
-    } catch (err) {
-      console.error("Erro ao salvar cache local:", err);
-    }
-
-    return updatedList;
-  });
-};
+    });
+  };
 
   useEffect(() => {
     let isFirstLoad = displayStories.length === 0;
@@ -398,7 +383,7 @@ const handleIncomingStories = (incoming: Story[]) => {
   });
 
   return (
-    <div style={{ position: "relative", width: "100%", minHeight: "100dvh", height: "100dvh", overflow: "hidden", background: "#f7f3eb" }}>
+    <div style={{ position: "relative", width: "100%", minHeight: "100dvh", overflowY: "auto", overflowX: "hidden", background: "#f7f3eb" }}>
       <style>{`
         @keyframes marqueeLeft {
           0% { transform: translateX(0%); }
@@ -427,7 +412,7 @@ const handleIncomingStories = (incoming: Story[]) => {
       {/* Barra Superior Responsiva */}
       <div 
         className="px-3 py-2.5 sm:px-7 sm:py-3.5"
-        style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 30, display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(to bottom, rgba(247,243,235,0.96) 0%, transparent 100%)" }}
+        style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 30, display: "flex", flexWrap: "wrap", rowGap: 6, justifyContent: "space-between", alignItems: "center", background: "linear-gradient(to bottom, rgba(247,243,235,0.96) 0%, transparent 100%)" }}
       >
         <button
           onClick={() => navigate("/")}

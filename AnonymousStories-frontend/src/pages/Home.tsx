@@ -247,14 +247,14 @@ export function Home() {
                 width="188"
                 height="44"
                 rx="4"
-                className="fill-[#1a1208] group-hover:fill-[#f7f3eb] stroke-[#1a1208] transition-colors duration-200"
+                className="fill-[#1a1208] group-hover:fill-[#f7f3eb] group-active:fill-[#f7f3eb] stroke-[#1a1208] transition-colors duration-200"
                 strokeWidth="2.2"
                 filter="url(#btn-sketch)"
               />
             </svg>
             <button
               onClick={() => navigate(isAuthenticated ? "/write" : "/login")}
-              className="relative z-10 w-full h-full px-2 sm:px-6 py-[13px] bg-transparent text-[#f7f3eb] group-hover:text-[#1a1208] font-['Caveat'] font-bold text-[17px] sm:text-[19px] border-none cursor-pointer flex items-center justify-center transition-colors duration-200 whitespace-nowrap"
+              className="relative z-10 w-full h-full px-2 sm:px-6 py-[13px] bg-transparent text-[#f7f3eb] group-hover:text-[#1a1208] group-active:text-[#1a1208] font-['Caveat'] font-bold text-[17px] sm:text-[19px] border-none cursor-pointer flex items-center justify-center transition-colors duration-200 whitespace-nowrap"
             >
               Escrever uma carta
             </button>
@@ -291,14 +291,14 @@ export function Home() {
                 width="124"
                 height="44"
                 rx="4"
-                className="fill-[#1a1208] group-hover:fill-[#f7f3eb] stroke-[#1a1208] transition-colors duration-200"
+                className="fill-[#1a1208] group-hover:fill-[#f7f3eb] group-active:fill-[#f7f3eb] stroke-[#1a1208] transition-colors duration-200"
                 strokeWidth="2.2"
                 filter="url(#btn2-sketch)"
               />
             </svg>
             <button
               onClick={() => navigate("/feed")}
-              className="relative z-10 w-full h-full px-2 sm:px-4 py-[13px] bg-transparent text-[#f7f3eb] group-hover:text-[#1a1208] font-['Caveat'] font-semibold text-[17px] sm:text-[19px] border-none cursor-pointer flex items-center justify-center transition-colors duration-200 whitespace-nowrap"
+              className="relative z-10 w-full h-full px-2 sm:px-4 py-[13px] bg-transparent text-[#f7f3eb] group-hover:text-[#1a1208] group-active:text-[#1a1208] font-['Caveat'] font-semibold text-[17px] sm:text-[19px] border-none cursor-pointer flex items-center justify-center transition-colors duration-200 whitespace-nowrap"
             >
               Ler cartas
             </button>
