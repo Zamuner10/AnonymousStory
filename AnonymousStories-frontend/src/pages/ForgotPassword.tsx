@@ -8,7 +8,6 @@ import { api } from "../services/api";
 
 function FormBox({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-full min-h-[100vh] overflow-y-auto bg-[#f7f3eb]">
     <div className="relative w-[380px] max-w-[92vw]">
       <svg className="absolute inset-0 w-full h-full overflow-visible pointer-events-none">
         <defs>
@@ -180,7 +179,6 @@ export function ForgotPassword() {
           voltar para o início
         </button>
       </div>
-    </div>
     </div>
   );
 }
