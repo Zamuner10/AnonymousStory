@@ -280,15 +280,6 @@ export function Register() {
                     entrar
                   </button>
                 </div>
-
-                {/* Botão de Voltar diretamente colado abaixo do Login */}
-                <button 
-                  type="button" 
-                  onClick={() => navigate("/")} 
-                  className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[15px] sm:text-[17px] text-[#7a5a2a] hover:text-[#1a1208] active:text-[#1a1208] underline transition-colors touch-manipulation min-h-[38px] flex items-center justify-center mt-1"
-                >
-                voltar para o início
-                </button>
               </div>
             </form>
           )}

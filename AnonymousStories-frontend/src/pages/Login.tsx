@@ -258,14 +258,6 @@ export function Login() {
           </form>
         </FormBox>
 
-        {/* Botão de Voltar */}
-        <button
-          type="button"
-          onClick={() => navigate("/")}
-          className="mt-6 px-6 py-2.5 min-h-[48px] bg-[#fffdfc] border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[18px] font-bold text-[#1a1208] flex items-center justify-center gap-2 hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] transition-colors shadow-sm touch-manipulation z-30"
-        >
-          voltar para o início
-        </button>
       </div>
     </div>
   );
