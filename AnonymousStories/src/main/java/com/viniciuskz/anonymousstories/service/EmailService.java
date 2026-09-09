@@ -16,10 +16,10 @@ public class EmailService {
     @Value("${app.base-url}")
     private String baseUrl;
 
-    @Value("${brevo.api.key}")
+    @Value("${BREVO_API_KEY:${brevo.api.key:}}")
     private String apiKey;
 
-    @Value("${brevo.from.email}")
+    @Value("${BREVO_FROM_EMAIL:${brevo.from.email:ha.historiasanonimas@gmail.com}}")
     private String mailFrom;
 
     private final RestTemplate restTemplate;
