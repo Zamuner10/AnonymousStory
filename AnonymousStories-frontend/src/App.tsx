@@ -22,7 +22,7 @@ export default function App() {
 
 
         {/* Rotas de Redefinição de Senha */}
-        <Route path="/forgot" element={<ForgotPassword/>} />
+        <Route path="/forgot-password" element={<ForgotPassword/>} />
         <Route path="/reset-password" element={<ResetPassword/>}/>
 
         {/* Rota Protegida */}
