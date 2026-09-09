@@ -94,9 +94,12 @@ public class EmailService {
     }
 
     @Async
-    public void sendPasswordResetEmail(String toEmail, String token) {
-        // Garantindo que a rota seja montada para o Frontend na Vercel com o parâmetro 'token'
-        String resetLink = frontendUrl + "/reset-password?token=" + token;
+    public void sendPasswordResetEmail(String toEmail, String resetLinkOrToken) {
+        // Se já for uma URL completa enviada pelo controller, mantém.
+        // Se for só o token, monta o link com a URL da Vercel.
+        String resetLink = resetLinkOrToken.startsWith("http")
+                ? resetLinkOrToken
+                : frontendUrl + "/reset-password?token=" + resetLinkOrToken;
 
         String htmlContent = """
                 <!DOCTYPE html>
