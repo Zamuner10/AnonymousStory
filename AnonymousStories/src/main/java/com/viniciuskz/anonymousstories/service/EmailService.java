@@ -16,6 +16,9 @@ public class EmailService {
     @Value("${app.base-url}")
     private String baseUrl;
 
+    @Value("${APP_FRONTEND_URL:${app.frontend-url:https://historiasanonimas.vercel.app}}")
+    private String frontendUrl;
+
     @Value("${BREVO_API_KEY:${brevo.api.key:}}")
     private String apiKey;
 
@@ -91,7 +94,10 @@ public class EmailService {
     }
 
     @Async
-    public void sendPasswordResetEmail(String toEmail, String resetLink) {
+    public void sendPasswordResetEmail(String toEmail, String token) {
+        // Garantindo que a rota seja montada para o Frontend na Vercel com o parâmetro 'token'
+        String resetLink = frontendUrl + "/reset-password?token=" + token;
+
         String htmlContent = """
                 <!DOCTYPE html>
                 <html>
@@ -128,13 +134,11 @@ public class EmailService {
 
             Map<String, Object> payload = new HashMap<>();
 
-            // Remetente
             Map<String, String> sender = new HashMap<>();
             sender.put("name", "Histórias Anônimas");
             sender.put("email", mailFrom);
             payload.put("sender", sender);
 
-            // Destinatário
             Map<String, String> to = new HashMap<>();
             to.put("email", toEmail);
             payload.put("to", List.of(to));
