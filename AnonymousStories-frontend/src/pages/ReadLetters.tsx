@@ -318,7 +318,7 @@ export function ReadLetters() {
 
 const handleIncomingStories = (incoming: Story[]) => {
   setDisplayStories((prev) => {
-    // Se não tinha nada carregado, cria a lista inicial (fixando a história 1 e embaralhando o resto)
+    // Se não tinha nada carregado, cria a lista inicial
     if (prev.length === 0) {
       const fixedStory1 = incoming.find((s) => s.id === 1);
       const remaining = incoming.filter((s) => s.id !== 1);
@@ -335,25 +335,23 @@ const handleIncomingStories = (incoming: Story[]) => {
       return updatedList;
     }
 
-    // Mapeia os IDs recebidos do backend
+    // 1. Mapeia os IDs vindos do banco Neon
     const incomingIds = new Set(incoming.map((s) => s.id));
 
-    // 1. Remove cartas do estado local que foram excluídas no banco de dados
+    // 2. REMOVE do celular/PC as cartas que foram deletadas do banco
     const filteredPrev = prev.filter((s) => incomingIds.has(s.id));
 
-    // 2. Identifica se há histórias realmente novas enviadas pelo backend
+    // 3. Adiciona cartas novas (se houver)
     const existingIds = new Set(filteredPrev.map((s) => s.id));
     const newStories = incoming.filter((s) => !existingIds.has(s.id));
 
-    // Se nenhuma carta foi deletada e nenhuma carta nova entrou, mantém o estado
     if (newStories.length === 0 && filteredPrev.length === prev.length) {
       return prev;
     }
 
-    // Combina as cartas mantidas com as novas
     const updatedList = [...filteredPrev, ...newStories];
 
-    // Atualiza o localStorage com a lista synronizada com o servidor
+    // 4. Atualiza o armazenamento local do celular com a lista limpa
     try {
       localStorage.setItem("anonymous_stories_cache", JSON.stringify(updatedList));
     } catch (err) {
