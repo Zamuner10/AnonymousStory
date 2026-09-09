@@ -116,7 +116,7 @@ export function Login() {
     try {
       await api.post("/login", { email, password });
       await checkAuth();
-      navigate("/stories");
+      navigate("/write");
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const message = err.response?.data?.message || "E-mail ou senha incorretos.";
