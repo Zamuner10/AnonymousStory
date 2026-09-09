@@ -116,7 +116,7 @@ export function Login() {
     try {
       await api.post("/login", { email, password });
       await checkAuth();
-      navigate("/write");
+      navigate("/stories");
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const message = err.response?.data?.message || "E-mail ou senha incorretos.";
@@ -133,7 +133,7 @@ export function Login() {
   };
 
   return (
-    <div className="relative w-full min-h-[100dvh] overflow-y-auto py-6 pb-20 flex items-center justify-center bg-[#f7f3eb]">
+    <div className="relative w-full min-h-[100dvh] overflow-y-auto bg-[#f7f3eb]">
       <Background fadeStrength="heavy" />
 
       {/* Ilustrações e Rabiscos nos cantos */}
@@ -148,7 +148,7 @@ export function Login() {
         <text x="1100" y="580" fontSize="16" fill="#1a1208" opacity="0.11" filter="url(#d2)" fontFamily="serif">✦</text>
       </svg>
 
-      <div className="relative z-10 flex flex-col items-center my-4 sm:my-auto w-full px-2">
+      <div className="relative z-10 flex flex-col items-center w-full px-2 pt-4 pb-28 my-auto">
         {/* Logotipo */}
         <button
           onClick={() => navigate("/")}
@@ -192,7 +192,7 @@ export function Login() {
                 {needsVerification && (
                   <button
                     type="button"
-                    onClick={() => navigate("/resend-verification")}
+                    onClick={() => navigate("/forgot-password")}
                     className="mt-1 bg-transparent border-none cursor-pointer font-['Caveat'] text-[15px] text-[#b07030] underline hover:text-[#4169E1]"
                   >
                     Reenviar e-mail de confirmação
@@ -228,7 +228,7 @@ export function Login() {
               <div className="text-right -mt-1">
                 <button
                   type="button"
-                  onClick={() => navigate("/forgot")}
+                  onClick={() => navigate("/forgot-password")}
                   className="bg-transparent border-none cursor-pointer font-['Caveat'] text-[15px] text-[#b07030] hover:text-[#4169E1] active:text-[#4169E1] underline p-1 transition-colors touch-manipulation min-h-[36px] inline-flex items-center"
                 >
                   esqueci minha senha
@@ -262,7 +262,7 @@ export function Login() {
         <button
           type="button"
           onClick={() => navigate("/")}
-          className="mt-4 px-5 py-2.5 min-h-[44px] bg-[#fffdfc]/90 border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[17px] font-bold text-[#1a1208] flex items-center justify-center gap-[6px] hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] focus:bg-[#1a1208] focus:text-[#f7f3eb] transition-colors shadow-sm select-none touch-manipulation"
+          className="mt-6 px-6 py-2.5 min-h-[48px] bg-[#fffdfc] border-2 border-[#1a1208] rounded-md cursor-pointer font-['Caveat'] text-[18px] font-bold text-[#1a1208] flex items-center justify-center gap-2 hover:bg-[#1a1208] hover:text-[#f7f3eb] active:bg-[#1a1208] active:text-[#f7f3eb] transition-colors shadow-sm touch-manipulation z-30"
         >
           voltar para o início
         </button>
