@@ -81,9 +81,6 @@ public class UserService {
                 String token = UUID.randomUUID().toString();
                 user.setVerificationToken(token);
 
-                // Se a sua entidade possuir o campo tokenExpiration:
-                // user.setTokenExpiration(LocalDateTime.now().plusHours(24));
-
                 userRepository.save(user);
 
                 emailService.sendVerificationEmail(user.getEmail(), token);
@@ -117,8 +114,17 @@ public class UserService {
             throw new IllegalArgumentException("O link para redefinição de senha expirou. Solicite um novo link.");
         }
 
+        // Valida regras de complexidade da nova senha
+        validatePassword(dto.newPassword());
+
+        // Criptografa a nova senha com BCrypt
         user.setPassword(passwordEncoder.encode(dto.newPassword()));
 
+        // Ativa a conta automaticamente ao redefinir a senha
+        user.setIsVerified(true);
+        user.setVerificationToken(null);
+
+        // Limpa os tokens de redefinição
         user.setPasswordResetToken(null);
         user.setPasswordResetTokenExpiry(null);
 
@@ -128,7 +134,7 @@ public class UserService {
     private void validateEmailAlreadyExist(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isPresent()) {
-            throw new IllegalArgumentException("The email address is already registered.");
+            throw new IllegalArgumentException("Esse endereço de e-mail já está cadastrado");
         }
     }
 

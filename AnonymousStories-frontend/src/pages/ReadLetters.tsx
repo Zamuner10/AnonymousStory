@@ -409,10 +409,10 @@ export function ReadLetters() {
         }
       `}</style>
 
-      {/* Barra Superior Responsiva */}
+      {/* Barra Superior Responsiva Fixo no Topo */}
       <div 
         className="px-3 py-2.5 sm:px-7 sm:py-3.5"
-        style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 30, display: "flex", flexWrap: "wrap", rowGap: 6, justifyContent: "space-between", alignItems: "center", background: "linear-gradient(to bottom, rgba(247,243,235,0.96) 0%, transparent 100%)" }}
+        style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 30, display: "flex", flexWrap: "wrap", rowGap: 6, justifyContent: "space-between", alignItems: "center", background: "linear-gradient(to bottom, rgba(247,243,235,0.98) 0%, rgba(247,243,235,0.8) 70%, transparent 100%)", backdropFilter: "blur(2px)" }}
       >
         <button
           onClick={() => navigate("/")}
@@ -470,10 +470,10 @@ export function ReadLetters() {
         </div>
       </div>
 
-      <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(80,100,180,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(80,100,180,0.05) 1px, transparent 1px)", backgroundSize: "28px 28px", pointerEvents: "none" }} />
+      <div style={{ position: "fixed", inset: 0, backgroundImage: "linear-gradient(rgba(80,100,180,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(80,100,180,0.05) 1px, transparent 1px)", backgroundSize: "28px 28px", pointerEvents: "none" }} />
 
-      {/* Esteiras Infinitas */}
-      <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", justifyContent: "space-evenly", paddingBlock: 4, paddingTop: 52 }}>
+      {/* Esteiras Infinitas (Com espaçamento superior e inferior para não cobrir a barra nem o contador) */}
+      <div style={{ width: "100%", minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "space-evenly", paddingBlock: 4, paddingTop: 68, paddingBottom: 56 }}>
         {ROWS_CONFIG.map((row, i) => (
           <Row   
             key={i}
@@ -487,8 +487,25 @@ export function ReadLetters() {
         ))}
       </div>
 
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 20, height: 44, background: "linear-gradient(to top, rgba(247,243,235,0.96) 0%, transparent 100%)", display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 8, pointerEvents: "none" }}>
-        <span className="text-xs sm:text-sm text-center px-2" style={{ fontFamily: "Caveat, cursive", color: "#7a5a2a", opacity: 0.75 }}>
+      {/* Contador Fixo Sempre no Rodapé Verdadeiro da Tela */}
+      <div 
+        style={{ 
+          position: "fixed", 
+          bottom: 0, 
+          left: 0, 
+          right: 0, 
+          zIndex: 20, 
+          height: 48, 
+          background: "linear-gradient(to top, rgba(247,243,235,0.98) 0%, rgba(247,243,235,0.85) 70%, transparent 100%)", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          paddingBottom: "env(safe-area-inset-bottom, 6px)",
+          pointerEvents: "none",
+          backdropFilter: "blur(2px)"
+        }}
+      >
+        <span className="text-xs sm:text-sm text-center px-2" style={{ fontFamily: "Caveat, cursive", color: "#7a5a2a", fontWeight: 700, opacity: 0.85 }}>
           {error ? error : loading ? "carregando histórias..." : `${displayStories.length} histórias anônimas neste lugar ✦ clique em uma carta para ler`}
         </span>
       </div>
