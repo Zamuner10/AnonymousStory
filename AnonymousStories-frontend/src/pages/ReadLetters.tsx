@@ -1,5 +1,5 @@
 // src/pages/ReadLetters.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { Header } from "../components/Header";
@@ -375,12 +375,40 @@ export function ReadLetters() {
   }, []);
 
   const numRows = 5;
-  const rowsStories: (Story | null)[][] = Array.from({ length: numRows }, () => []);
 
-  displayStories.forEach((story, index) => {
-    const rowIndex = index % numRows;
-    rowsStories[rowIndex].push(story);
-  });
+  // CORREÇÃO: antes, cada história era colocada sempre na PRIMEIRA
+  // posição livre da fileira (posição 0, depois 1, depois 2...) — isso
+  // fazia as primeiras histórias caírem sempre no mesmo lugar visual
+  // (uma "coluna" no início de cada fileira), em vez de espalhadas de
+  // verdade. Agora sorteamos EM QUAL POSIÇÃO da fileira (0 a
+  // SLOTS_PER_ROW-1) cada história cai, então elas ficam distribuídas
+  // nos dois eixos (fileira E posição dentro da fileira), não só entre
+  // fileiras.
+  //
+  // useMemo é essencial aqui: sem ele, esse sorteio rodaria de novo a
+  // cada re-renderização (mesmo sem história nova chegando), fazendo as
+  // cartas "pularem" de posição sem motivo — o mesmo tipo de bug de
+  // piscar que já corrigimos antes no polling. Com useMemo, só
+  // recalcula quando "displayStories" realmente muda.
+  const rowsStories: (Story | null)[][] = useMemo(() => {
+    const rows: (Story | null)[][] = Array.from({ length: numRows }, () =>
+      Array(SLOTS_PER_ROW).fill(null)
+    );
+
+    displayStories.forEach((story, index) => {
+      const rowIndex = index % numRows;
+      const emptySlotsInRow = rows[rowIndex]
+        .map((slot, slotIndex) => (slot === null ? slotIndex : -1))
+        .filter((slotIndex) => slotIndex !== -1);
+
+      if (emptySlotsInRow.length > 0) {
+        const randomSlot = emptySlotsInRow[Math.floor(Math.random() * emptySlotsInRow.length)];
+        rows[rowIndex][randomSlot] = story;
+      }
+    });
+
+    return rows;
+  }, [displayStories]);
 
   return (
     <div style={{ position: "relative", width: "100%", minHeight: "100dvh", overflowY: "auto", overflowX: "hidden", background: "#f7f3eb" }}>
