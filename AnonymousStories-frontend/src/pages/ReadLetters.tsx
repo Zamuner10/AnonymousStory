@@ -141,6 +141,8 @@ const ROWS_CONFIG = [
   { dir: "left" as const, dur: 60, so: 2, to: 1 },
 ];
 
+const SLOTS_PER_ROW = 8;
+
 function Row({
   rowStories,
   direction,
@@ -149,22 +151,21 @@ function Row({
   tiltOff,
   onCardClick,
 }: {
-  rowStories: Story[];
+  rowStories: (Story | null)[];
   direction: "left" | "right";
   duration: number;
   seedOff: number;
   tiltOff: number;
   onCardClick: (s: Story) => void;
 }) {
-  // Se a fileira não tiver histórias, não renderiza a esteira para evitar bugs
-  if (!rowStories || rowStories.length === 0) return null;
+  // Garante que o bloco base tenha ao menos SLOTS_PER_ROW slots ou o total de histórias recebidas
+  const totalSlots = Math.max(SLOTS_PER_ROW, rowStories.length);
+  const baseBlock = Array.from({ length: totalSlots }, (_, idx) => 
+    idx < rowStories.length ? rowStories[idx] : null
+  );
 
-  // Repete as histórias da fileira para criar a sensação de loop infinito fluido
-  let itemsToDisplay = [...rowStories];
-  while (itemsToDisplay.length < 6) {
-    itemsToDisplay = [...itemsToDisplay, ...rowStories];
-  }
-  const infiniteLoopSlots = [...itemsToDisplay, ...itemsToDisplay];
+  // Duplica o bloco base apenas para criar o loop do CSS Marquee
+  const infiniteLoopSlots = [...baseBlock, ...baseBlock];
 
   return (
     <div style={{ overflow: "hidden", width: "100%", flexShrink: 0 }}>
@@ -174,11 +175,11 @@ function Row({
       >
         {infiniteLoopSlots.map((storyData, i) => (
           <ReadCard
-            key={`${storyData.id}-${i}`}
+            key={i}
             story={storyData}
             seed={(i + seedOff) % 17 + 1}
             tilt={TILTS[(i + tiltOff) % TILTS.length]}
-            onClick={() => onCardClick(storyData)}
+            onClick={() => storyData && onCardClick(storyData)}
           />
         ))}
       </div>
@@ -377,10 +378,11 @@ export function ReadLetters() {
 
   const numRows = 4;
 
-  // Distribuição perfeita de todas as histórias recebidas entre as 4 fileiras
-  const rowsStories: Story[][] = useMemo(() => {
-    const rows: Story[][] = Array.from({ length: numRows }, () => []);
+  const rowsStories: (Story | null)[][] = useMemo(() => {
+    // Inicializa as 4 fileiras vazias
+    const rows: (Story | null)[][] = Array.from({ length: numRows }, () => []);
 
+    // Distribui cada história sequencialmente sem duplicar
     displayStories.forEach((story, index) => {
       const rowIndex = index % numRows;
       rows[rowIndex].push(story);
@@ -479,8 +481,8 @@ export function ReadLetters() {
 
       <div style={{ position: "fixed", inset: 0, backgroundImage: "linear-gradient(rgba(80,100,180,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(80,100,180,0.05) 1px, transparent 1px)", backgroundSize: "28px 28px", pointerEvents: "none" }} />
 
-      {/* Esteiras Infinitas com espaçamento ajustado */}
-      <div style={{ width: "100%", minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "space-between", paddingBlock: 4, paddingTop: 68, paddingBottom: 56 }}>
+      {/* Esteiras Infinitas */}
+      <div style={{ width: "100%", minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "space-evenly", paddingBlock: 4, paddingTop: 68, paddingBottom: 56 }}>
         {ROWS_CONFIG.map((row, i) => (
           <Row   
             key={i}
