@@ -134,15 +134,12 @@ function ReadCard({
 
 const TILTS = [-3, 2, -5, 1, -2, 4, -1, 3, -4, 2, -6, 0];
 
-// ALTERADO: Apenas 4 configurações de fileira
 const ROWS_CONFIG = [
   { dir: "right" as const, dur: 52, so: 0, to: 0 },
   { dir: "left" as const, dur: 66, so: 4, to: 3 },
   { dir: "right" as const, dur: 46, so: 8, to: 6 },
   { dir: "left" as const, dur: 60, so: 2, to: 1 },
 ];
-
-const SLOTS_PER_ROW = 8;
 
 function Row({
   rowStories,
@@ -152,19 +149,22 @@ function Row({
   tiltOff,
   onCardClick,
 }: {
-  rowStories: (Story | null)[];
+  rowStories: Story[];
   direction: "left" | "right";
   duration: number;
   seedOff: number;
   tiltOff: number;
   onCardClick: (s: Story) => void;
 }) {
-  const totalSlots = Math.max(SLOTS_PER_ROW, rowStories.length);
-  const baseBlock = Array.from({ length: totalSlots }, (_, idx) => 
-    idx < rowStories.length ? rowStories[idx] : null
-  );
+  // Se a fileira não tiver histórias, não renderiza a esteira para evitar bugs
+  if (!rowStories || rowStories.length === 0) return null;
 
-  const infiniteLoopSlots = [...baseBlock, ...baseBlock];
+  // Repete as histórias da fileira para criar a sensação de loop infinito fluido
+  let itemsToDisplay = [...rowStories];
+  while (itemsToDisplay.length < 6) {
+    itemsToDisplay = [...itemsToDisplay, ...rowStories];
+  }
+  const infiniteLoopSlots = [...itemsToDisplay, ...itemsToDisplay];
 
   return (
     <div style={{ overflow: "hidden", width: "100%", flexShrink: 0 }}>
@@ -174,11 +174,11 @@ function Row({
       >
         {infiniteLoopSlots.map((storyData, i) => (
           <ReadCard
-            key={i}
+            key={`${storyData.id}-${i}`}
             story={storyData}
             seed={(i + seedOff) % 17 + 1}
             tilt={TILTS[(i + tiltOff) % TILTS.length]}
-            onClick={() => storyData && onCardClick(storyData)}
+            onClick={() => onCardClick(storyData)}
           />
         ))}
       </div>
@@ -375,26 +375,15 @@ export function ReadLetters() {
     return () => clearInterval(intervalId);
   }, []);
 
-  // ALTERADO: Apenas 4 fileiras para não criar uma extra
   const numRows = 4;
 
-  const rowsStories: (Story | null)[][] = useMemo(() => {
-    const rows: (Story | null)[][] = Array.from({ length: numRows }, () =>
-      Array(SLOTS_PER_ROW).fill(null)
-    );
+  // Distribuição perfeita de todas as histórias recebidas entre as 4 fileiras
+  const rowsStories: Story[][] = useMemo(() => {
+    const rows: Story[][] = Array.from({ length: numRows }, () => []);
 
     displayStories.forEach((story, index) => {
       const rowIndex = index % numRows;
-      const emptySlotsInRow = rows[rowIndex]
-        .map((slot, slotIndex) => (slot === null ? slotIndex : -1))
-        .filter((slotIndex) => slotIndex !== -1);
-
-      if (emptySlotsInRow.length > 0) {
-        const randomSlot = emptySlotsInRow[Math.floor(Math.random() * emptySlotsInRow.length)];
-        rows[rowIndex][randomSlot] = story;
-      } else {
-        rows[rowIndex].push(story);
-      }
+      rows[rowIndex].push(story);
     });
 
     return rows;
@@ -408,7 +397,7 @@ export function ReadLetters() {
           100% { transform: translateX(-50%); }
         }
         @keyframes marqueeRight {
-          0% { transform: translateX(0%); }
+          0% { transform: translateX(-50%); }
           100% { transform: translateX(0%); }
         }
         .animate-marquee-slow-left {
@@ -427,7 +416,7 @@ export function ReadLetters() {
         }
       `}</style>
 
-      {/* Barra Superior Responsiva Fixo no Topo */}
+      {/* Barra Superior Fixo no Topo */}
       <div 
         className="px-3 py-2.5 sm:px-7 sm:py-3.5"
         style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 30, display: "flex", flexWrap: "wrap", rowGap: 6, justifyContent: "space-between", alignItems: "center", background: "linear-gradient(to bottom, rgba(247,243,235,0.98) 0%, rgba(247,243,235,0.8) 70%, transparent 100%)", backdropFilter: "blur(2px)" }}
@@ -490,8 +479,8 @@ export function ReadLetters() {
 
       <div style={{ position: "fixed", inset: 0, backgroundImage: "linear-gradient(rgba(80,100,180,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(80,100,180,0.05) 1px, transparent 1px)", backgroundSize: "28px 28px", pointerEvents: "none" }} />
 
-      {/* Esteiras Infinitas ajustadas para caberem perfeitamente em 4 linhas */}
-      <div style={{ width: "100%", minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "space-evenly", paddingBlock: 4, paddingTop: 68, paddingBottom: 56 }}>
+      {/* Esteiras Infinitas com espaçamento ajustado */}
+      <div style={{ width: "100%", minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "space-between", paddingBlock: 4, paddingTop: 68, paddingBottom: 56 }}>
         {ROWS_CONFIG.map((row, i) => (
           <Row   
             key={i}
