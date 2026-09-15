@@ -233,26 +233,32 @@ export function CreateStory() {
               </div>
 
               {/* Área de escrita */}
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value.slice(0, MAX_CONTENT))}
-                placeholder={"Escreva aqui a sua história...\n\nSeja ela de um amor, uma conquista ou uma perda.\nEsta carta será lida por alguém, um dia."}
-                className="touch-manipulation"
-                style={{
-                  flex: 1,
-                  minHeight: 160,
-                  width: "100%",
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  resize: "none",
-                  fontFamily: "Caveat, cursive",
-                  fontSize: 19,
-                  lineHeight: "27px",
-                  color: "#1a1208",
-                }}
-              />
-
+{/* Área de escrita corrigida */}
+<textarea
+  value={content}
+  maxLength={MAX_CONTENT} // Bloqueia fisicamente a colagem acima de 700 caracteres no navegador
+  onChange={(e) => {
+    const text = e.target.value;
+    if (text.length <= MAX_CONTENT) {
+      setContent(text);
+    }
+  }}
+  placeholder={"Escreva aqui a sua história...\n\nSeja ela de um amor, uma conquista ou uma perda.\nEsta carta será lida por alguém, um dia."}
+  className="touch-manipulation"
+  style={{
+    flex: 1,
+    minHeight: 160,
+    width: "100%",
+    background: "transparent",
+    border: "none",
+    outline: "none",
+    resize: "none",
+    fontFamily: "Caveat, cursive",
+    fontSize: 19,
+    lineHeight: "27px",
+    color: "#1a1208",
+  }}
+/>
               {/* Contador com barra de progresso */}
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 6, marginBottom: 4 }}>
                 <div style={{ flex: 1, height: 3, background: "rgba(26,18,8,0.12)", borderRadius: 2, overflow: "hidden" }}>
