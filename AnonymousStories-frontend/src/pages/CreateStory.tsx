@@ -53,7 +53,7 @@ export function CreateStory() {
 
     setLoading(true);
     try {
-      await api.post("/stories", { title, content, anonymous });
+      await api.post("/stories", { title, content, anonymous, authorDisplayName:displayName });
       setSent(true);
       setTimeout(() => navigate("/feed"), 1600);
     } catch (err) {
@@ -232,7 +232,6 @@ export function CreateStory() {
                 </span>
               </div>
 
-              {/* Área de escrita */}
 {/* Área de escrita corrigida */}
 <textarea
   value={content}
