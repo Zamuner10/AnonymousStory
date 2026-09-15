@@ -16,7 +16,7 @@ O sistema lida com autentificação seguria via JWT/Cookies, moderação de cont
 - **Persistência:** Spring Data JPA & Hibernate
 - **Validação:** Jakarta Bean Validation
 - **Documentação:** Swagger UI / OpenAPI 3
-- **Envio de E-mails:** JavaMailSender (Integração com SMTP do Gmail)
+- **Envio de E-mails:** JavaMailSender (Integração com SMTP do Brevo)
 
 ---
 

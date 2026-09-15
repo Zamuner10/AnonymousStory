@@ -159,7 +159,9 @@ function Row({
   tiltOff: number;
   onCardClick: (s: Story) => void;
 }) {
-  const baseBlock = Array.from({ length: SLOTS_PER_ROW }, (_, idx) => 
+  // Ajustado para garantir que todos os elementos recebidos na fileira sejam exibidos
+  const totalSlots = Math.max(SLOTS_PER_ROW, rowStories.length);
+  const baseBlock = Array.from({ length: totalSlots }, (_, idx) => 
     idx < rowStories.length ? rowStories[idx] : null
   );
 
@@ -376,20 +378,6 @@ export function ReadLetters() {
 
   const numRows = 5;
 
-  // CORREÇÃO: antes, cada história era colocada sempre na PRIMEIRA
-  // posição livre da fileira (posição 0, depois 1, depois 2...) — isso
-  // fazia as primeiras histórias caírem sempre no mesmo lugar visual
-  // (uma "coluna" no início de cada fileira), em vez de espalhadas de
-  // verdade. Agora sorteamos EM QUAL POSIÇÃO da fileira (0 a
-  // SLOTS_PER_ROW-1) cada história cai, então elas ficam distribuídas
-  // nos dois eixos (fileira E posição dentro da fileira), não só entre
-  // fileiras.
-  //
-  // useMemo é essencial aqui: sem ele, esse sorteio rodaria de novo a
-  // cada re-renderização (mesmo sem história nova chegando), fazendo as
-  // cartas "pularem" de posição sem motivo — o mesmo tipo de bug de
-  // piscar que já corrigimos antes no polling. Com useMemo, só
-  // recalcula quando "displayStories" realmente muda.
   const rowsStories: (Story | null)[][] = useMemo(() => {
     const rows: (Story | null)[][] = Array.from({ length: numRows }, () =>
       Array(SLOTS_PER_ROW).fill(null)
@@ -404,6 +392,9 @@ export function ReadLetters() {
       if (emptySlotsInRow.length > 0) {
         const randomSlot = emptySlotsInRow[Math.floor(Math.random() * emptySlotsInRow.length)];
         rows[rowIndex][randomSlot] = story;
+      } else {
+        // Se todos os slots estarem ocupados, adiciona a história ao final da fileira
+        rows[rowIndex].push(story);
       }
     });
 
@@ -500,7 +491,7 @@ export function ReadLetters() {
 
       <div style={{ position: "fixed", inset: 0, backgroundImage: "linear-gradient(rgba(80,100,180,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(80,100,180,0.05) 1px, transparent 1px)", backgroundSize: "28px 28px", pointerEvents: "none" }} />
 
-      {/* Esteiras Infinitas (Com espaçamento superior e inferior para não cobrir a barra nem o contador) */}
+      {/* Esteiras Infinitas */}
       <div style={{ width: "100%", minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "space-evenly", paddingBlock: 4, paddingTop: 68, paddingBottom: 56 }}>
         {ROWS_CONFIG.map((row, i) => (
           <Row   
