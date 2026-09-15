@@ -14,7 +14,7 @@ O aplicativo apresenta um mural contínuo no estilo "esteira infinita" para a le
 - **Comunicação com API:** Axios (com gerenciamento de cookies e sessão)
 - **Estilização:** Tailwind CSS / CSS3 (Animações com Keyframes e CSS Marquee)
 - **Design System & Efeitos:** SVGs Customizados (com filtros de turbulência `<feTurbulence>` para efeitos de papel e bordas desenhadas)
-- **Tipografia:** Google Fonts (Fonte artesanal *Caveat*)
+- **Tipografia:** Google Fonts (Fonte artesanal *Caveat* provavelmente irei mudar algumas fontes)
 - **Efeitos Dinâmicos:** Transformações CSS 2D (inclinação/tilt aleatório das cartas e animações de marquee contínuo)
 
 ---
