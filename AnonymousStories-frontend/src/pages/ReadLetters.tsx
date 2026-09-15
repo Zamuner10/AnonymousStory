@@ -134,12 +134,12 @@ function ReadCard({
 
 const TILTS = [-3, 2, -5, 1, -2, 4, -1, 3, -4, 2, -6, 0];
 
+// ALTERADO: Apenas 4 configurações de fileira
 const ROWS_CONFIG = [
   { dir: "right" as const, dur: 52, so: 0, to: 0 },
   { dir: "left" as const, dur: 66, so: 4, to: 3 },
   { dir: "right" as const, dur: 46, so: 8, to: 6 },
   { dir: "left" as const, dur: 60, so: 2, to: 1 },
-  { dir: "right" as const, dur: 54, so: 6, to: 4 },
 ];
 
 const SLOTS_PER_ROW = 8;
@@ -159,7 +159,6 @@ function Row({
   tiltOff: number;
   onCardClick: (s: Story) => void;
 }) {
-  // Ajustado para garantir que todos os elementos recebidos na fileira sejam exibidos
   const totalSlots = Math.max(SLOTS_PER_ROW, rowStories.length);
   const baseBlock = Array.from({ length: totalSlots }, (_, idx) => 
     idx < rowStories.length ? rowStories[idx] : null
@@ -376,7 +375,8 @@ export function ReadLetters() {
     return () => clearInterval(intervalId);
   }, []);
 
-  const numRows = 5;
+  // ALTERADO: Apenas 4 fileiras para não criar uma extra
+  const numRows = 4;
 
   const rowsStories: (Story | null)[][] = useMemo(() => {
     const rows: (Story | null)[][] = Array.from({ length: numRows }, () =>
@@ -393,7 +393,6 @@ export function ReadLetters() {
         const randomSlot = emptySlotsInRow[Math.floor(Math.random() * emptySlotsInRow.length)];
         rows[rowIndex][randomSlot] = story;
       } else {
-        // Se todos os slots estarem ocupados, adiciona a história ao final da fileira
         rows[rowIndex].push(story);
       }
     });
@@ -409,7 +408,7 @@ export function ReadLetters() {
           100% { transform: translateX(-50%); }
         }
         @keyframes marqueeRight {
-          0% { transform: translateX(-50%); }
+          0% { transform: translateX(0%); }
           100% { transform: translateX(0%); }
         }
         .animate-marquee-slow-left {
@@ -491,7 +490,7 @@ export function ReadLetters() {
 
       <div style={{ position: "fixed", inset: 0, backgroundImage: "linear-gradient(rgba(80,100,180,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(80,100,180,0.05) 1px, transparent 1px)", backgroundSize: "28px 28px", pointerEvents: "none" }} />
 
-      {/* Esteiras Infinitas */}
+      {/* Esteiras Infinitas ajustadas para caberem perfeitamente em 4 linhas */}
       <div style={{ width: "100%", minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "space-evenly", paddingBlock: 4, paddingTop: 68, paddingBottom: 56 }}>
         {ROWS_CONFIG.map((row, i) => (
           <Row   
@@ -506,7 +505,7 @@ export function ReadLetters() {
         ))}
       </div>
 
-      {/* Contador Fixo Sempre no Rodapé Verdadeiro da Tela */}
+      {/* Contador Fixo no Rodapé */}
       <div 
         style={{ 
           position: "fixed", 
