@@ -53,7 +53,7 @@ export function CreateStory() {
 
     setLoading(true);
     try {
-      await api.post("/stories", { title, content, anonymous, authorDisplayName:displayName });
+      await api.post("/stories", { title, content, anonymous });
       setSent(true);
       setTimeout(() => navigate("/feed"), 1600);
     } catch (err) {

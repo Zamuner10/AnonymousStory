@@ -17,8 +17,7 @@ public record StoryRequestDTO(
         // do campo JSON). O frontend manda a chave "anonymous" (sem o
         // "is"), então o valor nunca chegava aqui, e a escolha da pessoa
         // era sempre ignorada, caindo no padrão (Anônimo).
-        Boolean anonymous,
-        String authorDisplayName
+        Boolean anonymous
 ) {
         public StoryRequestDTO{
                 if(anonymous==null){
