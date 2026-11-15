@@ -1,0 +1,50 @@
+name: Pipeline CI/CD - AnonymousStory
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ci-build-and-validate:
+    name: CI - Build e Validação
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 21 (Backend)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+          cache-dependency-path: AnonymousStories/pom.xml
+
+      - name: Verificar estrutura do Frontend
+        run: |
+          test -d AnonymousStories-frontend
+          ls -la AnonymousStories-frontend
+
+      - name: Build e Validação do Backend (Spring Boot)
+        working-directory: ./AnonymousStories
+        run: |
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+
+  cd-deploy:
+    name: CD - Deploy em Produção
+    needs: ci-build-and-validate
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Disparar Deploy do Backend (Render)
+        run: |
+          curl -f -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+
+      - name: Disparar Deploy do Frontend (Vercel)
+        run: |
+          curl -f -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
