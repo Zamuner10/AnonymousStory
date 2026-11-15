@@ -15,10 +15,10 @@ jobs:
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      - name: Configurar Java 21 (Backend)
+      - name: Configurar Java 25 (Backend)
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
           cache: maven
           cache-dependency-path: AnonymousStories/pom.xml
